@@ -27,15 +27,26 @@ model User {
 }
 
 model Sensor {
-  id          String         @id @default(uuid())
-  key         String         @unique // e.g. "CAPPL:LOCAL.hk[0].pe_raumtemperatur_ist"
-  label       String
-  unit        String?
-  correction  Float          @default(0)
-  createdAt   DateTime       @default(now())
-  updatedAt   DateTime       @updatedAt
-  readings    SensorReading[]
-  graphLinks  GraphSensor[]
+  id         String          @id @default(uuid())
+  key        String          @unique // stable admin-chosen slug, e.g. "outdoor_temp" — independent of wire format
+  label      String
+  unit       String?
+  correction Float           @default(0)
+  csvColumn  Int?            @unique // 0-based column index in the boiler's daily CSV, after the jour/heure columns
+  createdAt  DateTime        @default(now())
+  updatedAt  DateTime        @updatedAt
+  readings   SensorReading[]
+  graphLinks GraphSensor[]
+}
+
+// Singleton row (id is always "singleton") holding how to reach the boiler on the LAN.
+// Historical CSV pull needs only the host; the live control channel (Phase 2) will add
+// credentials here, encrypted at rest — see lib/crypto.ts.
+model BoilerConnection {
+  id        String   @id @default("singleton")
+  host      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model SensorReading {

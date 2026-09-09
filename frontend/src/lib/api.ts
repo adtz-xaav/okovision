@@ -4,6 +4,36 @@ export type SessionUser = {
   role: "ADMIN" | "VIEWER";
 };
 
+export type Sensor = {
+  id: string;
+  key: string;
+  label: string;
+  unit: string | null;
+  correction: number;
+  csvColumn: number | null;
+};
+
+export type SensorInput = {
+  key: string;
+  label: string;
+  unit?: string;
+  correction: number;
+  csvColumn?: number;
+};
+
+export type BoilerConnection = { id: string; host: string } | { configured: false };
+
+export type Reading = { timestamp: string; value: number };
+
+export type SchedulerRun = {
+  id: string;
+  job: string;
+  status: "PENDING" | "RUNNING" | "SUCCESS" | "FAILED";
+  startedAt: string;
+  finishedAt: string | null;
+  error: string | null;
+};
+
 export class ApiError extends Error {
   status: number;
 
@@ -34,4 +64,26 @@ export const api = {
   register: (email: string, password: string) =>
     request<SessionUser>("/auth/register", { method: "POST", body: JSON.stringify({ email, password }) }),
   logout: () => request<void>("/auth/logout", { method: "POST" }),
+
+  listSensors: () => request<Sensor[]>("/sensors"),
+  createSensor: (input: SensorInput) => request<Sensor>("/sensors", { method: "POST", body: JSON.stringify(input) }),
+  updateSensor: (id: string, input: SensorInput) =>
+    request<Sensor>(`/sensors/${id}`, { method: "PUT", body: JSON.stringify(input) }),
+  deleteSensor: (id: string) => request<void>(`/sensors/${id}`, { method: "DELETE" }),
+
+  getBoilerConnection: () => request<BoilerConnection>("/boiler-connection"),
+  setBoilerConnection: (host: string) =>
+    request<BoilerConnection>("/boiler-connection", { method: "PUT", body: JSON.stringify({ host }) }),
+
+  getReadings: (sensorId: string, from?: string, to?: string) => {
+    const params = new URLSearchParams({ sensorId });
+    if (from) params.set("from", from);
+    if (to) params.set("to", to);
+    return request<Reading[]>(`/readings?${params.toString()}`);
+  },
+
+  runBoilerIngest: () => request<{ datesConsidered: number; readingsWritten: number }>("/scheduler/jobs/boiler-ingest/run", {
+    method: "POST",
+  }),
+  listSchedulerRuns: () => request<SchedulerRun[]>("/scheduler/runs"),
 };

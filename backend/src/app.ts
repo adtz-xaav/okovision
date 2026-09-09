@@ -4,6 +4,10 @@ import express from "express";
 import helmet from "helmet";
 import { env } from "./lib/env.js";
 import { authRouter } from "./routes/auth.routes.js";
+import { boilerConnectionRouter } from "./routes/boilerConnection.routes.js";
+import { readingRouter } from "./routes/reading.routes.js";
+import { schedulerRouter } from "./routes/scheduler.routes.js";
+import { sensorRouter } from "./routes/sensor.routes.js";
 
 export function createApp() {
   const app = express();
@@ -23,6 +27,10 @@ export function createApp() {
   });
 
   app.use("/api/auth", authRouter);
+  app.use("/api/sensors", sensorRouter);
+  app.use("/api/boiler-connection", boilerConnectionRouter);
+  app.use("/api/readings", readingRouter);
+  app.use("/api/scheduler", schedulerRouter);
 
   return app;
 }

@@ -3,13 +3,17 @@ import "./App.css";
 import { api, type SessionUser } from "./lib/api";
 import { format, useLocale } from "./hooks/useLocale";
 import { LoginPage } from "./pages/LoginPage";
+import { HistoryPage } from "./pages/HistoryPage";
+import { SensorsPage } from "./pages/SensorsPage";
 
 type AuthState = "checking" | "anonymous" | "authenticated";
+type Tab = "history" | "sensors";
 
 function App() {
   const { language, setLanguage, t } = useLocale();
   const [authState, setAuthState] = useState<AuthState>("checking");
   const [user, setUser] = useState<SessionUser | null>(null);
+  const [tab, setTab] = useState<Tab>("history");
 
   useEffect(() => {
     api
@@ -54,13 +58,26 @@ function App() {
       )}
 
       {authState === "authenticated" && user && (
-        <main className="dashboard">
+        <>
           <div className="session-bar">
+            <nav className="tab-nav">
+              <button className={tab === "history" ? "active" : ""} onClick={() => setTab("history")}>
+                {t.nav.history}
+              </button>
+              {user.role === "ADMIN" && (
+                <button className={tab === "sensors" ? "active" : ""} onClick={() => setTab("sensors")}>
+                  {t.nav.sensors}
+                </button>
+              )}
+            </nav>
             <span>{format(t.session.signedInAs, { email: user.email, role: user.role })}</span>
             <button onClick={handleLogout}>{t.session.logout}</button>
           </div>
-          <p>{t.dashboard.placeholder}</p>
-        </main>
+          <main className="dashboard">
+            {tab === "history" && <HistoryPage t={t} />}
+            {tab === "sensors" && user.role === "ADMIN" && <SensorsPage t={t} />}
+          </main>
+        </>
       )}
     </div>
   );
