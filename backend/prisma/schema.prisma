@@ -40,11 +40,32 @@ model Sensor {
 }
 
 // Singleton row (id is always "singleton") holding how to reach the boiler on the LAN.
-// Historical CSV pull needs only the host; the live control channel (Phase 2) will add
-// credentials here, encrypted at rest — see lib/crypto.ts.
+// Historical CSV pull needs only the host. The live channel additionally needs the
+// boiler's own web UI login — a separate credential set from Okovision's own users —
+// so username/password are optional and only required once live control is configured.
+// The password is encrypted at rest (reversible — see lib/crypto.ts), never hashed,
+// because the connector genuinely needs the plaintext to log in to the boiler.
 model BoilerConnection {
-  id        String   @id @default("singleton")
-  host      String
+  id                String   @id @default("singleton")
+  host              String
+  username          String?
+  encryptedPassword String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+// Admin-configured mapping from a friendly name to a real tag path on the boiler's live
+// protocol (e.g. "CAPPL:LOCAL.anlage_betriebsart"), discovered by reading the boiler's own
+// config.min.js rather than guessed — see PellematicTouchClient. Values on the wire are
+// raw scaled integers; divisor converts to/from the human-readable value shown in the UI.
+model LiveTag {
+  id        String   @id @default(uuid())
+  key       String   @unique
+  label     String
+  tag       String   @unique
+  writable  Boolean  @default(false)
+  divisor   Float    @default(1)
+  unit      String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }

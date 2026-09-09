@@ -1,5 +1,5 @@
 import { useEffect, useState, type FormEvent } from "react";
-import { api, ApiError, type Sensor, type SchedulerRun } from "../lib/api";
+import { api, ApiError, type LiveTag, type Sensor, type SchedulerRun } from "../lib/api";
 import type { Dictionary } from "../locales/en";
 
 type SensorFormState = {
@@ -12,6 +12,17 @@ type SensorFormState = {
 
 const emptyForm: SensorFormState = { key: "", label: "", unit: "", correction: "0", csvColumn: "" };
 
+type LiveTagFormState = {
+  key: string;
+  label: string;
+  tag: string;
+  writable: boolean;
+  divisor: string;
+  unit: string;
+};
+
+const emptyLiveTagForm: LiveTagFormState = { key: "", label: "", tag: "", writable: false, divisor: "1", unit: "" };
+
 export function SensorsPage({ t }: { t: Dictionary }) {
   const [sensors, setSensors] = useState<Sensor[]>([]);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -19,6 +30,9 @@ export function SensorsPage({ t }: { t: Dictionary }) {
   const [formError, setFormError] = useState<string | null>(null);
 
   const [host, setHost] = useState("");
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [hasCredentials, setHasCredentials] = useState(false);
   const [connectionMessage, setConnectionMessage] = useState<string | null>(null);
 
   const [ingestMessage, setIngestMessage] = useState<string | null>(null);
@@ -28,6 +42,11 @@ export function SensorsPage({ t }: { t: Dictionary }) {
   const [importMessage, setImportMessage] = useState<string | null>(null);
   const [importError, setImportError] = useState<string | null>(null);
 
+  const [liveTags, setLiveTags] = useState<LiveTag[]>([]);
+  const [editingLiveTagId, setEditingLiveTagId] = useState<string | null>(null);
+  const [liveTagForm, setLiveTagForm] = useState<LiveTagFormState>(emptyLiveTagForm);
+  const [liveTagFormError, setLiveTagFormError] = useState<string | null>(null);
+
   function loadSensors() {
     api.listSensors().then(setSensors);
   }
@@ -36,11 +55,20 @@ export function SensorsPage({ t }: { t: Dictionary }) {
     api.listSchedulerRuns().then(setRuns);
   }
 
+  function loadLiveTags() {
+    api.listLiveTags().then(setLiveTags);
+  }
+
   useEffect(() => {
     loadSensors();
     loadRuns();
+    loadLiveTags();
     api.getBoilerConnection().then((connection) => {
-      if ("host" in connection) setHost(connection.host);
+      if (connection.configured) {
+        setHost(connection.host);
+        setUsername(connection.username ?? "");
+        setHasCredentials(connection.hasCredentials);
+      }
     });
   }, []);
 
@@ -106,7 +134,9 @@ export function SensorsPage({ t }: { t: Dictionary }) {
 
   async function saveConnection(event: FormEvent) {
     event.preventDefault();
-    await api.setBoilerConnection(host);
+    const connection = await api.setBoilerConnection(host, username || undefined, password || undefined);
+    setPassword("");
+    if (connection.configured) setHasCredentials(connection.hasCredentials);
     setConnectionMessage(t.sensors.connectionSaved);
   }
 
@@ -124,6 +154,54 @@ export function SensorsPage({ t }: { t: Dictionary }) {
     }
   }
 
+  function startAddLiveTag() {
+    setEditingLiveTagId("new");
+    setLiveTagForm(emptyLiveTagForm);
+    setLiveTagFormError(null);
+  }
+
+  function startEditLiveTag(liveTag: LiveTag) {
+    setEditingLiveTagId(liveTag.id);
+    setLiveTagForm({
+      key: liveTag.key,
+      label: liveTag.label,
+      tag: liveTag.tag,
+      writable: liveTag.writable,
+      divisor: String(liveTag.divisor),
+      unit: liveTag.unit ?? "",
+    });
+    setLiveTagFormError(null);
+  }
+
+  async function submitLiveTagForm(event: FormEvent) {
+    event.preventDefault();
+    setLiveTagFormError(null);
+    const input = {
+      key: liveTagForm.key,
+      label: liveTagForm.label,
+      tag: liveTagForm.tag,
+      writable: liveTagForm.writable,
+      divisor: Number(liveTagForm.divisor) || 1,
+      unit: liveTagForm.unit || undefined,
+    };
+    try {
+      if (editingLiveTagId === "new") {
+        await api.createLiveTag(input);
+      } else if (editingLiveTagId) {
+        await api.updateLiveTag(editingLiveTagId, input);
+      }
+      setEditingLiveTagId(null);
+      loadLiveTags();
+    } catch (err) {
+      setLiveTagFormError(err instanceof ApiError ? err.message : String(err));
+    }
+  }
+
+  async function removeLiveTag(id: string) {
+    await api.deleteLiveTag(id);
+    loadLiveTags();
+  }
+
   return (
     <section className="page-section">
       <div className="panel">
@@ -133,9 +211,23 @@ export function SensorsPage({ t }: { t: Dictionary }) {
             {t.sensors.boilerHost}
             <input value={host} onChange={(e) => setHost(e.target.value)} placeholder="192.168.1.50" />
           </label>
+          <label>
+            {t.sensors.boilerUsername}
+            <input value={username} onChange={(e) => setUsername(e.target.value)} />
+          </label>
+          <label>
+            {t.sensors.boilerPassword}
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder={hasCredentials ? t.sensors.boilerPasswordUnchanged : ""}
+            />
+          </label>
           <button type="submit">{t.sensors.saveConnection}</button>
         </form>
         <p className="field-hint">{t.sensors.boilerHostHint}</p>
+        <p className="field-hint">{t.sensors.boilerCredentialsHint}</p>
         {connectionMessage && <p className="field-hint">{connectionMessage}</p>}
 
         <button type="button" onClick={runIngest}>
@@ -260,6 +352,99 @@ export function SensorsPage({ t }: { t: Dictionary }) {
             <div className="row-actions">
               <button type="submit">{t.sensors.save}</button>
               <button type="button" onClick={() => setEditingId(null)}>
+                {t.sensors.cancel}
+              </button>
+            </div>
+          </form>
+        )}
+      </div>
+
+      <div className="panel">
+        <h2>{t.sensors.liveTagsTitle}</h2>
+        <div className="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>{t.sensors.key}</th>
+                <th>{t.sensors.label}</th>
+                <th>{t.sensors.liveTagPath}</th>
+                <th>{t.sensors.liveTagWritable}</th>
+                <th>{t.sensors.liveTagDivisor}</th>
+                <th>{t.sensors.unit}</th>
+                <th />
+              </tr>
+            </thead>
+            <tbody>
+              {liveTags.map((liveTag) => (
+                <tr key={liveTag.id}>
+                  <td>{liveTag.key}</td>
+                  <td>{liveTag.label}</td>
+                  <td className="mono-cell">{liveTag.tag}</td>
+                  <td>{liveTag.writable ? "✓" : "—"}</td>
+                  <td>{liveTag.divisor}</td>
+                  <td>{liveTag.unit ?? "—"}</td>
+                  <td className="row-actions">
+                    <button type="button" onClick={() => startEditLiveTag(liveTag)}>
+                      {t.sensors.edit}
+                    </button>
+                    <button type="button" onClick={() => removeLiveTag(liveTag.id)}>
+                      {t.sensors.delete}
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        {editingLiveTagId === null ? (
+          <button type="button" onClick={startAddLiveTag}>
+            {t.sensors.liveTagAdd}
+          </button>
+        ) : (
+          <form className="sensor-form" onSubmit={submitLiveTagForm}>
+            <label>
+              {t.sensors.key}
+              <input value={liveTagForm.key} onChange={(e) => setLiveTagForm({ ...liveTagForm, key: e.target.value })} required />
+            </label>
+            <label>
+              {t.sensors.label}
+              <input value={liveTagForm.label} onChange={(e) => setLiveTagForm({ ...liveTagForm, label: e.target.value })} required />
+            </label>
+            <label>
+              {t.sensors.liveTagPath}
+              <input
+                value={liveTagForm.tag}
+                onChange={(e) => setLiveTagForm({ ...liveTagForm, tag: e.target.value })}
+                placeholder="CAPPL:LOCAL.oekomode"
+                required
+              />
+            </label>
+            <label>
+              <input
+                type="checkbox"
+                checked={liveTagForm.writable}
+                onChange={(e) => setLiveTagForm({ ...liveTagForm, writable: e.target.checked })}
+              />
+              {" " + t.sensors.liveTagWritable}
+            </label>
+            <label>
+              {t.sensors.liveTagDivisor}
+              <input type="number" step="any" value={liveTagForm.divisor} onChange={(e) => setLiveTagForm({ ...liveTagForm, divisor: e.target.value })} />
+            </label>
+            <label>
+              {t.sensors.unit}
+              <input value={liveTagForm.unit} onChange={(e) => setLiveTagForm({ ...liveTagForm, unit: e.target.value })} />
+            </label>
+            <p className="field-hint">{t.sensors.liveTagHint}</p>
+            {liveTagFormError && (
+              <p className="login-error" role="alert">
+                {liveTagFormError}
+              </p>
+            )}
+            <div className="row-actions">
+              <button type="submit">{t.sensors.save}</button>
+              <button type="button" onClick={() => setEditingLiveTagId(null)}>
                 {t.sensors.cancel}
               </button>
             </div>

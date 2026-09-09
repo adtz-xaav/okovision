@@ -21,7 +21,9 @@ export type SensorInput = {
   csvColumn?: number;
 };
 
-export type BoilerConnection = { id: string; host: string } | { configured: false };
+export type BoilerConnection =
+  | { configured: false }
+  | { configured: true; host: string; username: string | null; hasCredentials: boolean };
 
 export type Reading = { timestamp: string; value: number };
 
@@ -32,6 +34,35 @@ export type SchedulerRun = {
   startedAt: string;
   finishedAt: string | null;
   error: string | null;
+};
+
+export type LiveTag = {
+  id: string;
+  key: string;
+  label: string;
+  tag: string;
+  writable: boolean;
+  divisor: number;
+  unit: string | null;
+};
+
+export type LiveTagInput = {
+  key: string;
+  label: string;
+  tag: string;
+  writable: boolean;
+  divisor: number;
+  unit?: string;
+};
+
+export type LiveReading = {
+  id: string;
+  key: string;
+  label: string;
+  tag: string;
+  writable: boolean;
+  unit: string | null;
+  value: number | null;
 };
 
 export class ApiError extends Error {
@@ -74,8 +105,11 @@ export const api = {
   deleteSensor: (id: string) => request<void>(`/sensors/${id}`, { method: "DELETE" }),
 
   getBoilerConnection: () => request<BoilerConnection>("/boiler-connection"),
-  setBoilerConnection: (host: string) =>
-    request<BoilerConnection>("/boiler-connection", { method: "PUT", body: JSON.stringify({ host }) }),
+  setBoilerConnection: (host: string, username?: string, password?: string) =>
+    request<BoilerConnection>("/boiler-connection", {
+      method: "PUT",
+      body: JSON.stringify({ host, ...(username && password ? { username, password } : {}) }),
+    }),
 
   getReadings: (sensorId: string, from?: string, to?: string) => {
     const params = new URLSearchParams({ sensorId });
@@ -88,4 +122,13 @@ export const api = {
     method: "POST",
   }),
   listSchedulerRuns: () => request<SchedulerRun[]>("/scheduler/runs"),
+
+  listLiveTags: () => request<LiveTag[]>("/live-tags"),
+  createLiveTag: (input: LiveTagInput) => request<LiveTag>("/live-tags", { method: "POST", body: JSON.stringify(input) }),
+  updateLiveTag: (id: string, input: LiveTagInput) =>
+    request<LiveTag>(`/live-tags/${id}`, { method: "PUT", body: JSON.stringify(input) }),
+  deleteLiveTag: (id: string) => request<void>(`/live-tags/${id}`, { method: "DELETE" }),
+  getLiveValues: () => request<LiveReading[]>("/live-tags/values"),
+  setLiveValue: (id: string, value: number) =>
+    request<void>(`/live-tags/${id}/set`, { method: "POST", body: JSON.stringify({ value }) }),
 };

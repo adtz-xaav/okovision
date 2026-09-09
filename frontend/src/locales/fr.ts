@@ -19,6 +19,7 @@ export const fr: Dictionary = {
   },
   nav: {
     history: "Historique",
+    live: "Temps réel",
     sensors: "Capteurs",
   },
   history: {
@@ -30,6 +31,13 @@ export const fr: Dictionary = {
     value: "Valeur",
     noReadings: "Aucune mesure pour ce capteur sur la période sélectionnée.",
     selectSensorPrompt: "Choisissez un capteur pour afficher ses mesures.",
+  },
+  live: {
+    label: "Valeur",
+    value: "Actuelle",
+    setValue: "Appliquer",
+    setSuccess: "Envoyé à la chaudière.",
+    noTags: "Aucune valeur temps réel configurée. Demandez à un administrateur d'en associer une dans Capteurs.",
   },
   sensors: {
     title: "Correspondance des capteurs",
@@ -51,11 +59,21 @@ export const fr: Dictionary = {
     boilerConnectionTitle: "Connexion à la chaudière",
     boilerHost: "Adresse ou IP de la chaudière",
     boilerHostHint: "L'adresse de la chaudière Okofen sur votre réseau local, par ex. 192.168.1.50.",
+    boilerUsername: "Identifiant de connexion à la chaudière",
+    boilerPassword: "Mot de passe de connexion à la chaudière",
+    boilerPasswordUnchanged: "inchangé",
+    boilerCredentialsHint: "Les identifiants de l'interface web de la chaudière elle-même (pas votre compte Okovision) — nécessaires pour les valeurs et le pilotage en temps réel. Laisser les deux champs vides pour rester en historique seul.",
     saveConnection: "Enregistrer",
     connectionSaved: "Enregistré.",
     runIngestNow: "Récupérer les données de la chaudière maintenant",
     runIngestResult: "{dates} jour(s) examiné(s), {readings} mesure(s) enregistrée(s).",
     recentRuns: "Exécutions récentes",
     noRuns: "Aucune exécution pour le moment.",
+    liveTagsTitle: "Valeurs temps réel",
+    liveTagPath: "Variable de la chaudière",
+    liveTagWritable: "Modifiable",
+    liveTagDivisor: "Diviseur",
+    liveTagAdd: "Ajouter une valeur temps réel",
+    liveTagHint: "Le chemin réel de la variable sur la chaudière, par ex. CAPPL:LOCAL.oekomode. La chaudière envoie des entiers bruts à l'échelle (ex. 94 pour 9,4°C) — le diviseur convertit vers et depuis la valeur réelle.",
   },
 };

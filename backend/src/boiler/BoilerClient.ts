@@ -1,7 +1,7 @@
-// The historical channel: the boiler exposes one CSV log file per day at a fixed path on
-// its own web server. This interface covers that channel only — the live tag-session
-// channel (reading/writing the boiler's own settings) is a separate, Phase 2 concern that
-// will extend this interface when it's built, rather than being stubbed out ahead of need.
+// Two channels to the boiler. The historical one (log files served by the boiler's own web
+// server) needs no login; the live one drives the boiler's own admin web UI session and
+// needs credentials per call — see PellematicTouchClient for what was verified against a
+// real Pellematic Touch and what's still assumption.
 export interface BoilerClient {
   /** Calendar dates (YYYY-MM-DD) for which a daily CSV log currently exists on the boiler. */
   listAvailableDates(): Promise<string[]>;
@@ -15,4 +15,20 @@ export interface BoilerClient {
    * don't have to guess CSV column mappings by hand.
    */
   fetchColumnTitles(): Promise<string[]>;
+
+  /**
+   * Reads the current raw value of each given tag path (e.g. "CAPPL:LOCAL.oekomode") from
+   * the boiler's live web UI. Logs in fresh on every call — see PellematicTouchClient for
+   * why. Tags the boiler doesn't recognize are silently omitted from the result rather than
+   * failing the whole batch (that's how the boiler's own API behaves).
+   */
+  getLiveValues(username: string, password: string, tags: string[]): Promise<Record<string, string>>;
+
+  /**
+   * Writes raw values back to the boiler by tag path. Throws if the login or the write
+   * request itself fails. Unlike getLiveValues, the boiler's per-tag acceptance/rejection
+   * on a write has not been verified against real hardware — verify this against your own
+   * boiler before relying on it.
+   */
+  setLiveValues(username: string, password: string, values: Record<string, string>): Promise<void>;
 }

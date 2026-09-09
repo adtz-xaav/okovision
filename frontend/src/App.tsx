@@ -4,10 +4,11 @@ import { api, type SessionUser } from "./lib/api";
 import { format, useLocale } from "./hooks/useLocale";
 import { LoginPage } from "./pages/LoginPage";
 import { HistoryPage } from "./pages/HistoryPage";
+import { LivePage } from "./pages/LivePage";
 import { SensorsPage } from "./pages/SensorsPage";
 
 type AuthState = "checking" | "anonymous" | "authenticated";
-type Tab = "history" | "sensors";
+type Tab = "history" | "live" | "sensors";
 
 function App() {
   const { language, setLanguage, t } = useLocale();
@@ -64,6 +65,9 @@ function App() {
               <button className={tab === "history" ? "active" : ""} onClick={() => setTab("history")}>
                 {t.nav.history}
               </button>
+              <button className={tab === "live" ? "active" : ""} onClick={() => setTab("live")}>
+                {t.nav.live}
+              </button>
               {user.role === "ADMIN" && (
                 <button className={tab === "sensors" ? "active" : ""} onClick={() => setTab("sensors")}>
                   {t.nav.sensors}
@@ -75,6 +79,7 @@ function App() {
           </div>
           <main className="dashboard">
             {tab === "history" && <HistoryPage t={t} />}
+            {tab === "live" && <LivePage t={t} isAdmin={user.role === "ADMIN"} />}
             {tab === "sensors" && user.role === "ADMIN" && <SensorsPage t={t} />}
           </main>
         </>
