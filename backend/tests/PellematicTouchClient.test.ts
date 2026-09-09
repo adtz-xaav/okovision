@@ -54,4 +54,15 @@ describe("PellematicTouchClient", () => {
     const client = new PellematicTouchClient("192.168.1.50");
     await expect(client.fetchDayCsv("2026-01-01")).rejects.toThrow(/404/);
   });
+
+  it("parses the boiler's own column titles, ordered by index", async () => {
+    // Real-world quirk observed against a Pellematic Touch: index 0 isn't guaranteed first.
+    const titlesCsv = "1;Temp. ext. instantanée\n0;T extérieure\n\n2;CF1 (Chauffage) T Dep mes\n";
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(jsonResponse(titlesCsv)));
+
+    const client = new PellematicTouchClient("192.168.1.50");
+    const titles = await client.fetchColumnTitles();
+
+    expect(titles).toEqual(["T extérieure", "Temp. ext. instantanée", "CF1 (Chauffage) T Dep mes"]);
+  });
 });

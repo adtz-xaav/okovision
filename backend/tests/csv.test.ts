@@ -27,4 +27,16 @@ describe("parseTouchCsv", () => {
   it("returns an empty array for an empty file", () => {
     expect(parseTouchCsv("")).toEqual([]);
   });
+
+  it("skips the boiler's own header row (real Pellematic Touch export)", () => {
+    const header = 'Datum ;Zeit ;AT [°C];ATakt [°C];PE1_BR1 ;HK1 VL Ist[°C];HK1 VL Soll[°C];';
+    const csv = [header, "09.09.2026;00:03:47;18,2;17,9;0;32,8;8,0;"].join("\n");
+
+    const rows = parseTouchCsv(csv);
+
+    expect(rows).toHaveLength(1);
+    expect(rows[0].timestamp.toISOString()).toBe("2026-09-09T00:03:47.000Z");
+    // Trailing semicolon produces a harmless trailing null past the last real column.
+    expect(rows[0].values).toEqual([18.2, 17.9, 0, 32.8, 8.0, null]);
+  });
 });

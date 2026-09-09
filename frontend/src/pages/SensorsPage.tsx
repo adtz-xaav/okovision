@@ -25,6 +25,9 @@ export function SensorsPage({ t }: { t: Dictionary }) {
   const [ingestError, setIngestError] = useState<string | null>(null);
   const [runs, setRuns] = useState<SchedulerRun[]>([]);
 
+  const [importMessage, setImportMessage] = useState<string | null>(null);
+  const [importError, setImportError] = useState<string | null>(null);
+
   function loadSensors() {
     api.listSensors().then(setSensors);
   }
@@ -85,6 +88,20 @@ export function SensorsPage({ t }: { t: Dictionary }) {
   async function removeSensor(id: string) {
     await api.deleteSensor(id);
     loadSensors();
+  }
+
+  async function importFromBoiler() {
+    setImportMessage(null);
+    setImportError(null);
+    try {
+      const result = await api.importSensorsFromBoiler();
+      setImportMessage(
+        t.sensors.importResult.replace("{created}", String(result.created)).replace("{skipped}", String(result.skipped)),
+      );
+      loadSensors();
+    } catch (err) {
+      setImportError(err instanceof ApiError ? err.message : String(err));
+    }
   }
 
   async function saveConnection(event: FormEvent) {
@@ -196,10 +213,22 @@ export function SensorsPage({ t }: { t: Dictionary }) {
           </table>
         </div>
 
+        {importMessage && <p className="field-hint">{importMessage}</p>}
+        {importError && (
+          <p className="login-error" role="alert">
+            {importError}
+          </p>
+        )}
+
         {editingId === null ? (
-          <button type="button" onClick={startAdd}>
-            {t.sensors.add}
-          </button>
+          <div className="row-actions">
+            <button type="button" onClick={startAdd}>
+              {t.sensors.add}
+            </button>
+            <button type="button" onClick={importFromBoiler}>
+              {t.sensors.importFromBoiler}
+            </button>
+          </div>
         ) : (
           <form className="sensor-form" onSubmit={submitForm}>
             <label>

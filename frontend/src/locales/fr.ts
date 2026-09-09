@@ -40,6 +40,8 @@ export const fr: Dictionary = {
     csvColumn: "Colonne CSV",
     csvColumnHint: "Position (à partir de 0) dans le CSV journalier de la chaudière, après les colonnes date/heure. Laisser vide si ce capteur ne provient pas du CSV.",
     add: "Ajouter un capteur",
+    importFromBoiler: "Importer depuis la chaudière",
+    importResult: "{created} capteur(s) importé(s), {skipped} colonne(s) déjà associée(s) ignorée(s).",
     save: "Enregistrer",
     cancel: "Annuler",
     edit: "Modifier",

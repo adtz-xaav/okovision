@@ -8,4 +8,11 @@ export interface BoilerClient {
 
   /** Raw CSV text for one day's log. Throws if that day has no log file. */
   fetchDayCsv(date: string): Promise<string>;
+
+  /**
+   * Human-readable label for each CSV data column, in order (index 0 = first column after
+   * jour/heure) — the boiler documents its own column layout at `titles.csv`, so admins
+   * don't have to guess CSV column mappings by hand.
+   */
+  fetchColumnTitles(): Promise<string[]>;
 }

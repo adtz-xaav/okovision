@@ -1,9 +1,11 @@
 import { Router } from "express";
+import { PellematicTouchClient } from "../boiler/PellematicTouchClient.js";
 import { prisma } from "../lib/prisma.js";
 import { UserRole } from "../generated/prisma/enums.js";
 import { requireAuth, requireRole } from "../middleware/auth.middleware.js";
 import { validateBody } from "../middleware/validate.middleware.js";
 import { sensorSchema, type SensorInput } from "../schemas/sensor.schema.js";
+import { importSensorsFromBoiler } from "../services/sensorImport.service.js";
 
 export const sensorRouter = Router();
 
@@ -12,6 +14,17 @@ sensorRouter.use(requireAuth);
 sensorRouter.get("/", async (_req, res) => {
   const sensors = await prisma.sensor.findMany({ orderBy: { label: "asc" } });
   res.json(sensors);
+});
+
+sensorRouter.post("/import-from-boiler", requireRole(UserRole.ADMIN), async (_req, res) => {
+  const connection = await prisma.boilerConnection.findUnique({ where: { id: "singleton" } });
+  if (!connection) {
+    res.status(409).json({ error: "No boiler connection configured yet" });
+    return;
+  }
+  const client = new PellematicTouchClient(connection.host);
+  const result = await importSensorsFromBoiler(client);
+  res.json(result);
 });
 
 sensorRouter.post("/", requireRole(UserRole.ADMIN), validateBody(sensorSchema), async (req, res) => {

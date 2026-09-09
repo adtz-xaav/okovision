@@ -66,6 +66,8 @@ export const api = {
   logout: () => request<void>("/auth/logout", { method: "POST" }),
 
   listSensors: () => request<Sensor[]>("/sensors"),
+  importSensorsFromBoiler: () =>
+    request<{ created: number; skipped: number }>("/sensors/import-from-boiler", { method: "POST" }),
   createSensor: (input: SensorInput) => request<Sensor>("/sensors", { method: "POST", body: JSON.stringify(input) }),
   updateSensor: (id: string, input: SensorInput) =>
     request<Sensor>(`/sensors/${id}`, { method: "PUT", body: JSON.stringify(input) }),

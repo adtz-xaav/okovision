@@ -20,12 +20,16 @@ export class PellematicTouchClient implements BoilerClient {
     this.baseUrl = `http://${host}${LOG_DIR_PATH}`;
   }
 
-  async listAvailableDates(): Promise<string[]> {
-    const res = await fetch(this.baseUrl, { signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS) });
+  private async getText(path: string, notFoundMessage: string): Promise<string> {
+    const res = await fetch(`${this.baseUrl}${path}`, { signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS) });
     if (!res.ok) {
-      throw new Error(`Boiler log directory returned HTTP ${res.status}`);
+      throw new Error(`${notFoundMessage} (HTTP ${res.status})`);
     }
-    const html = await res.text();
+    return res.text();
+  }
+
+  async listAvailableDates(): Promise<string[]> {
+    const html = await this.getText("", "Boiler log directory unavailable");
     const dates = new Set<string>();
     for (const match of html.matchAll(FILENAME_PATTERN)) {
       dates.add(filenameToDate(match[1]));
@@ -34,11 +38,21 @@ export class PellematicTouchClient implements BoilerClient {
   }
 
   async fetchDayCsv(date: string): Promise<string> {
-    const url = `${this.baseUrl}${dateToFilename(date)}`;
-    const res = await fetch(url, { signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS) });
-    if (!res.ok) {
-      throw new Error(`No boiler log for ${date} (HTTP ${res.status})`);
+    return this.getText(dateToFilename(date), `No boiler log for ${date}`);
+  }
+
+  async fetchColumnTitles(): Promise<string[]> {
+    const csv = await this.getText("titles.csv", "Boiler column titles unavailable");
+    const titles: string[] = [];
+    for (const line of csv.split(/\r?\n/)) {
+      if (line.trim() === "") continue;
+      const separatorIndex = line.indexOf(";");
+      if (separatorIndex === -1) continue;
+      const index = Number(line.slice(0, separatorIndex).trim());
+      const label = line.slice(separatorIndex + 1).trim();
+      if (!Number.isInteger(index) || index < 0) continue;
+      titles[index] = label;
     }
-    return res.text();
+    return titles;
   }
 }

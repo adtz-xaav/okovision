@@ -38,6 +38,8 @@ export interface Dictionary {
     csvColumn: string;
     csvColumnHint: string;
     add: string;
+    importFromBoiler: string;
+    importResult: string;
     save: string;
     cancel: string;
     edit: string;
@@ -96,6 +98,8 @@ export const en: Dictionary = {
     csvColumn: "CSV column",
     csvColumnHint: "0-based position in the boiler's daily CSV, after the date/time columns. Leave blank if not fed from the CSV log.",
     add: "Add sensor",
+    importFromBoiler: "Import from boiler",
+    importResult: "Imported {created} sensor(s), skipped {skipped} already-mapped column(s).",
     save: "Save",
     cancel: "Cancel",
     edit: "Edit",
