@@ -1,0 +1,112 @@
+.app-shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 24px;
+  border-bottom: 1px solid light-dark(#d7dbde, #2c3339);
+}
+
+.app-name {
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+.language-switch {
+  display: flex;
+  gap: 6px;
+}
+
+.language-switch button {
+  border: 1px solid light-dark(#d7dbde, #2c3339);
+  background: transparent;
+  color: inherit;
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 0.8rem;
+}
+
+.language-switch button.active {
+  background: light-dark(#1b2024, #e7e9ea);
+  color: light-dark(#f4f5f6, #14171a);
+}
+
+.login-page {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: 100%;
+  max-width: 340px;
+}
+
+.login-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.9rem;
+}
+
+.login-form input {
+  padding: 8px 10px;
+  border: 1px solid light-dark(#d7dbde, #2c3339);
+  border-radius: 4px;
+  background: light-dark(#ffffff, #1d2126);
+  color: inherit;
+}
+
+.login-form button[type="submit"] {
+  padding: 10px;
+  border: none;
+  border-radius: 4px;
+  background: #c1560f;
+  color: #fff;
+  font-weight: 600;
+}
+
+.login-switch {
+  border: none;
+  background: none;
+  color: light-dark(#5b6570, #9ba3aa);
+  text-decoration: underline;
+  padding: 0;
+  font-size: 0.85rem;
+}
+
+.login-error {
+  color: #c1560f;
+  font-size: 0.85rem;
+  margin: 0;
+}
+
+.dashboard {
+  flex: 1;
+  padding: 24px;
+}
+
+.session-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.session-bar button {
+  border: 1px solid light-dark(#d7dbde, #2c3339);
+  background: transparent;
+  color: inherit;
+  border-radius: 4px;
+  padding: 6px 12px;
+}
