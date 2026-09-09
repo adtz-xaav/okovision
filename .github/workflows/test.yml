@@ -1,0 +1,53 @@
+name: Test
+
+on:
+  push:
+    branches: [dev, main]
+  pull_request:
+    branches: [dev, main]
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: okovision
+          POSTGRES_PASSWORD: okovision
+          POSTGRES_DB: okovision
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U okovision"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgresql://okovision:okovision@localhost:5432/okovision?schema=public
+      JWT_SECRET: ci-test-secret-not-used-in-production-00000000
+      BOILER_CREDENTIALS_KEY: 0000000000000000000000000000000000000000000000000000000000000000
+      COOKIE_SECURE: "false"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run prisma:generate --workspace backend
+      - run: npm run prisma:migrate:deploy --workspace backend
+      - run: npm run build --workspace backend
+      - run: npm run test --workspace backend
+
+  frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run test --workspace frontend
+      - run: npm run build --workspace frontend

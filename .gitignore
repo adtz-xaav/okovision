@@ -35,22 +35,6 @@
 ehthumbs.db
 Thumbs.db
 
-# Custom Project file #
-#######################
-*.csv
-config.php
-config.json
-*@eaDir
-@eaDir/
-Thumbs.db
-import.csv
-matrice.csv
-test*
-_tmp/*.sql
-_tmp/*.txt
-php.ini
-.c9/
-
 # Node/TS tooling (Okovision 2.0 rewrite)
 node_modules/
 dist/
