@@ -13,6 +13,10 @@ import { sensorRouter } from "./routes/sensor.routes.js";
 export function createApp() {
   const app = express();
 
+  // Trust the first hop only: in this deployment, nginx (the frontend container) is the
+  // sole reverse proxy in front of the backend, so its X-Forwarded-* headers are trustworthy.
+  app.set("trust proxy", 1);
+
   app.use(helmet());
   app.use(
     cors({

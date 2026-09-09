@@ -1,9 +1,14 @@
 FROM node:22-slim AS build
 WORKDIR /app
 COPY package.json ./package.json
+COPY package-lock.json ./package-lock.json
 COPY backend/package.json ./backend/package.json
 COPY frontend/package.json ./frontend/package.json
-RUN npm install --workspace backend
+RUN npm ci --workspace backend
+# npm's workspace hoisting is arch-dependent (platform-specific optional deps can tip
+# hoisting decisions differently) — this dir may end up empty, but must always exist so
+# the runtime stage's COPY below is deterministic regardless of build architecture.
+RUN mkdir -p /app/backend/node_modules
 COPY backend ./backend
 WORKDIR /app/backend
 RUN npx prisma generate

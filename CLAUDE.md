@@ -40,10 +40,11 @@ Automation is handled by `SchedulerService` (cron-based and DAG dependency-trigg
 - Documentation (`README.md`, `docs/*.md`): **French and English** — match that when editing existing docs.
 - Product UI is bilingual (`frontend/src/locales/en.ts` / `fr.ts`); add new user-facing strings to both locale files, never hardcode UI text.
 
-## Local Docker Redeploy (after a fix, for Xavier to test)
+## Reference Deployment Redeploy (after a fix, for Xavier to test)
 
-- Once a fix/feature is implemented (and its branch tested), the **`devops-engineer` agent** rebuilds/redeploys the local Docker stack proactively — don't wait for Xavier to ask.
-- Default to a targeted rebuild of the affected service(s), e.g. `docker compose up -d --build backend`. Full teardown (`docker compose down -v`, wiping volumes/data) is only for when the test explicitly requires a clean-slate instance — not the default after every fix.
+- Okovision runs containerized (Docker Compose: `postgres` + `backend` + `frontend`) so any Pellematic Touch owner can self-host it — no host/port/secret is ever hardcoded in the app or `docker-compose.yml`, only `.env`.
+- Xavier's own dogfooding instance runs on his QNAP NAS via Container Station — connection details, QNAP-specific quirks (no `git`, Docker binary off `$PATH`, manual `docker compose` plugin install, port 8180 not 8080), and the redeploy procedure are documented in the `devops-engineer` agent definition (`.claude/agents/devops-agent.md`), not here, since that's operational info about Xavier's infra rather than the product.
+- Once a fix/feature is implemented (and its branch tested), the **`devops-engineer` agent** redeploys that reference instance proactively — don't wait for Xavier to ask. Default to a targeted rebuild of the affected service(s). Full teardown (wiping the Postgres volume) is only for when the test explicitly requires a clean-slate instance — not the default after every fix.
 
 ## Notes
 
