@@ -47,4 +47,5 @@ coverage/
 # Claude Code local-only files (agents/CLAUDE.md are shared and tracked)
 .claude/settings.local.json
 .claude/*.local.json
+.claude/scheduled_tasks.lock
 

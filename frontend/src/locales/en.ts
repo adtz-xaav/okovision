@@ -17,6 +17,7 @@ export interface Dictionary {
   };
   nav: {
     history: string;
+    live: string;
     sensors: string;
   };
   history: {
@@ -28,6 +29,13 @@ export interface Dictionary {
     value: string;
     noReadings: string;
     selectSensorPrompt: string;
+  };
+  live: {
+    label: string;
+    value: string;
+    setValue: string;
+    setSuccess: string;
+    noTags: string;
   };
   sensors: {
     title: string;
@@ -49,12 +57,22 @@ export interface Dictionary {
     boilerConnectionTitle: string;
     boilerHost: string;
     boilerHostHint: string;
+    boilerUsername: string;
+    boilerPassword: string;
+    boilerPasswordUnchanged: string;
+    boilerCredentialsHint: string;
     saveConnection: string;
     connectionSaved: string;
     runIngestNow: string;
     runIngestResult: string;
     recentRuns: string;
     noRuns: string;
+    liveTagsTitle: string;
+    liveTagPath: string;
+    liveTagWritable: string;
+    liveTagDivisor: string;
+    liveTagAdd: string;
+    liveTagHint: string;
   };
 }
 
@@ -77,6 +95,7 @@ export const en: Dictionary = {
   },
   nav: {
     history: "History",
+    live: "Live",
     sensors: "Sensors",
   },
   history: {
@@ -88,6 +107,13 @@ export const en: Dictionary = {
     value: "Value",
     noReadings: "No readings for this sensor in the selected range.",
     selectSensorPrompt: "Choose a sensor to see its readings.",
+  },
+  live: {
+    label: "Value",
+    value: "Current",
+    setValue: "Set",
+    setSuccess: "Sent to the boiler.",
+    noTags: "No live values configured yet. Ask an admin to map one under Sensors.",
   },
   sensors: {
     title: "Sensor mapping",
@@ -109,11 +135,21 @@ export const en: Dictionary = {
     boilerConnectionTitle: "Boiler connection",
     boilerHost: "Boiler host or IP",
     boilerHostHint: "The Okofen boiler's address on your local network, e.g. 192.168.1.50.",
+    boilerUsername: "Boiler login username",
+    boilerPassword: "Boiler login password",
+    boilerPasswordUnchanged: "unchanged",
+    boilerCredentialsHint: "The boiler's own web UI login (not your Okovision account) — needed for live values and control. Leave both blank to keep history-only.",
     saveConnection: "Save",
     connectionSaved: "Saved.",
     runIngestNow: "Pull data from the boiler now",
     runIngestResult: "Considered {dates} day(s), wrote {readings} reading(s).",
     recentRuns: "Recent ingestion runs",
     noRuns: "No ingestion runs yet.",
+    liveTagsTitle: "Live values",
+    liveTagPath: "Boiler tag",
+    liveTagWritable: "Writable",
+    liveTagDivisor: "Divisor",
+    liveTagAdd: "Add live value",
+    liveTagHint: "The real tag path on the boiler, e.g. CAPPL:LOCAL.oekomode. The boiler sends raw scaled integers (e.g. 94 for 9.4°C) — divisor converts to and from the real value.",
   },
 };

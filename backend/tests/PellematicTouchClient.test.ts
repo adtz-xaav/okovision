@@ -65,4 +65,87 @@ describe("PellematicTouchClient", () => {
 
     expect(titles).toEqual(["T extérieure", "Temp. ext. instantanée", "CF1 (Chauffage) T Dep mes"]);
   });
+
+  function loginRedirect(sessionCookie = "pksession=31320; Path=/; Max-Age=600") {
+    return new Response(null, {
+      status: 303,
+      headers: [
+        ["set-cookie", "language=en; Path=/"],
+        ["set-cookie", sessionCookie],
+        ["location", "/"],
+      ],
+    });
+  }
+
+  describe("getLiveValues", () => {
+    it("logs in, then reads only the tags the boiler recognized", async () => {
+      const fetchMock = vi
+        .fn()
+        .mockResolvedValueOnce(loginRedirect())
+        .mockResolvedValueOnce(
+          jsonResponse(
+            JSON.stringify([
+              { status: "OK", name: "CAPPL:LOCAL.oekomode", value: "0" },
+              { status: "ERROR", name: "CAPPL:LOCAL.unknown_tag", value: "???" },
+            ]),
+          ),
+        );
+      vi.stubGlobal("fetch", fetchMock);
+
+      const client = new PellematicTouchClient("192.168.1.89");
+      const values = await client.getLiveValues("P0060B5_408AAE", "pellematiccompact", [
+        "CAPPL:LOCAL.oekomode",
+        "CAPPL:LOCAL.unknown_tag",
+      ]);
+
+      expect(values).toEqual({ "CAPPL:LOCAL.oekomode": "0" });
+
+      const [loginUrl, loginInit] = fetchMock.mock.calls[0];
+      expect(loginUrl).toBe("http://192.168.1.89/index.cgi");
+      expect(loginInit.redirect).toBe("manual");
+      expect(String(loginInit.body)).toContain("username=P0060B5_408AAE");
+      expect(String(loginInit.body)).toContain("password=pellematiccompact");
+
+      const [valuesUrl, valuesInit] = fetchMock.mock.calls[1];
+      expect(valuesUrl).toBe("http://192.168.1.89/?action=get");
+      expect(valuesInit.headers.Cookie).toBe("pksession=31320");
+      expect(JSON.parse(valuesInit.body)).toEqual(["CAPPL:LOCAL.oekomode", "CAPPL:LOCAL.unknown_tag"]);
+    });
+
+    it("throws when the boiler rejects the login", async () => {
+      vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(null, { status: 200 })));
+      const client = new PellematicTouchClient("192.168.1.89");
+      await expect(client.getLiveValues("wrong", "credentials", ["CAPPL:LOCAL.oekomode"])).rejects.toThrow(/rejected/);
+    });
+
+    it("throws when a successful-looking login carries no session cookie", async () => {
+      vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(null, { status: 303, headers: { location: "/" } })));
+      const client = new PellematicTouchClient("192.168.1.89");
+      await expect(client.getLiveValues("user", "pass", ["CAPPL:LOCAL.oekomode"])).rejects.toThrow(/session cookie/);
+    });
+  });
+
+  describe("setLiveValues", () => {
+    it("logs in, then posts the tag/value map to the set endpoint", async () => {
+      const fetchMock = vi.fn().mockResolvedValueOnce(loginRedirect()).mockResolvedValueOnce(new Response(null, { status: 200 }));
+      vi.stubGlobal("fetch", fetchMock);
+
+      const client = new PellematicTouchClient("192.168.1.89");
+      await client.setLiveValues("P0060B5_408AAE", "pellematiccompact", { "CAPPL:LOCAL.oekomode": "1" });
+
+      const [setUrl, setInit] = fetchMock.mock.calls[1];
+      expect(setUrl).toBe("http://192.168.1.89/?action=set");
+      expect(setInit.headers.Cookie).toBe("pksession=31320");
+      expect(JSON.parse(setInit.body)).toEqual({ "CAPPL:LOCAL.oekomode": "1" });
+    });
+
+    it("throws when the write request fails", async () => {
+      vi.stubGlobal(
+        "fetch",
+        vi.fn().mockResolvedValueOnce(loginRedirect()).mockResolvedValueOnce(new Response(null, { status: 500 })),
+      );
+      const client = new PellematicTouchClient("192.168.1.89");
+      await expect(client.setLiveValues("user", "pass", { "CAPPL:LOCAL.oekomode": "1" })).rejects.toThrow(/500/);
+    });
+  });
 });

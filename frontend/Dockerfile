@@ -1,8 +1,10 @@
 FROM node:22-slim AS build
 WORKDIR /app
-COPY package.json ../package.json
+COPY package.json ./package.json
+COPY package-lock.json ./package-lock.json
+COPY backend/package.json ./backend/package.json
 COPY frontend/package.json ./frontend/package.json
-RUN npm install --workspace frontend
+RUN npm ci --workspace frontend
 COPY frontend ./frontend
 WORKDIR /app/frontend
 RUN npm run build

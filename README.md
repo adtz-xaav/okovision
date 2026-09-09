@@ -12,6 +12,15 @@ Status: rewrite in progress. `backend/` and `frontend/` are the new application;
 - `frontend/` — React + Vite + TypeScript SPA.
 - `legacy/` — the original PHP application, kept for reference during the rewrite.
 
+## Deployment
+
+Run this on a Linux host on the same local network as your boiler (a NAS with Docker/Container Station support, a Raspberry Pi, a mini PC — anything that can run Docker Compose). **Don't use Docker Desktop for Mac or Windows for a real deployment**: its containers sit behind a VM that reaches the internet but not your LAN, so the app would never be able to reach the boiler. It's fine for frontend-only development.
+
+1. Copy `.env.example` to `.env` and fill in the two generated secrets (commands are in the file's comments: `openssl rand -base64 48` for `JWT_SECRET`, `openssl rand -hex 32` for `BOILER_CREDENTIALS_KEY`). Set a real `POSTGRES_PASSWORD`. Adjust `BACKEND_PORT`/`FRONTEND_PORT` if the defaults (4000/8080) are already used on your host.
+2. `docker compose up -d --build` — builds and starts `postgres`, `backend`, `frontend`; database migrations run automatically on backend startup.
+3. Open `http://<host>:<FRONTEND_PORT>` and register — the first account created becomes the ADMIN/owner account.
+4. From the admin **Sensors** page, set your boiler's LAN IP and its own web-UI login (not your Okovision account) to enable history ingestion and live values/control.
+
 ---
 
 # Okovision (FR)
@@ -21,3 +30,12 @@ Supervision et pilotage auto-hébergés pour une chaudière à granulés Okofen 
 Réécriture complète de l'application PHP originale [stawen/okovision](https://github.com/stawen/okovision) (conservée pour référence dans [`legacy/`](legacy/)). Voir `CLAUDE.md` pour l'architecture et les conventions.
 
 Statut : réécriture en cours. `backend/` et `frontend/` constituent la nouvelle application ; `legacy/` n'est plus maintenu.
+
+## Déploiement
+
+À faire tourner sur un hôte Linux sur le même réseau local que la chaudière (NAS avec support Docker/Container Station, Raspberry Pi, mini PC — tout ce qui peut exécuter Docker Compose). **Ne pas utiliser Docker Desktop pour Mac ou Windows en déploiement réel** : ses conteneurs sont derrière une VM qui accède à internet mais pas au réseau local, donc l'application ne pourrait jamais joindre la chaudière. C'est en revanche suffisant pour développer côté frontend.
+
+1. Copier `.env.example` en `.env` et renseigner les deux secrets générés (commandes en commentaire dans le fichier : `openssl rand -base64 48` pour `JWT_SECRET`, `openssl rand -hex 32` pour `BOILER_CREDENTIALS_KEY`). Définir un vrai `POSTGRES_PASSWORD`. Ajuster `BACKEND_PORT`/`FRONTEND_PORT` si les valeurs par défaut (4000/8080) sont déjà utilisées sur l'hôte.
+2. `docker compose up -d --build` — construit et démarre `postgres`, `backend`, `frontend` ; les migrations de base de données s'appliquent automatiquement au démarrage du backend.
+3. Ouvrir `http://<hôte>:<FRONTEND_PORT>` et créer un compte — le premier compte créé devient le compte ADMIN/propriétaire.
+4. Depuis la page admin **Capteurs**, renseigner l'adresse IP locale de la chaudière et ses propres identifiants de connexion web (pas le compte Okovision) pour activer l'historique et les valeurs/pilotage en temps réel.
