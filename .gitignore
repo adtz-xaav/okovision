@@ -51,4 +51,16 @@ _tmp/*.txt
 php.ini
 .c9/
 
+# Node/TS tooling (Okovision 2.0 rewrite)
+node_modules/
+dist/
+build/
+.env
+.env.*
+!.env.example
+coverage/
+
+# Claude Code local-only files (agents/CLAUDE.md are shared and tracked)
+.claude/settings.local.json
+.claude/*.local.json
 
