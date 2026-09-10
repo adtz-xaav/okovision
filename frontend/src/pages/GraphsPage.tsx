@@ -1,6 +1,7 @@
 import * as echarts from "echarts";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { api, ApiError, type Graph, type GraphData, type Sensor } from "../lib/api";
+import { SERIES_COLORS } from "../lib/seriesColors";
 import type { Dictionary } from "../locales/en";
 
 function defaultRange() {
@@ -17,11 +18,29 @@ function ChartView({ data }: { data: GraphData }) {
     if (!containerRef.current) return;
     const chart = echarts.init(containerRef.current);
     chart.setOption({
-      tooltip: { trigger: "axis" },
-      legend: { top: 0 },
+      backgroundColor: "transparent",
+      textStyle: { color: "rgba(237, 238, 233, 0.75)", fontFamily: "inherit" },
+      color: SERIES_COLORS,
+      tooltip: {
+        trigger: "axis",
+        backgroundColor: "#3a342e",
+        borderColor: "rgba(237, 238, 233, 0.12)",
+        textStyle: { color: "#edeeE9" },
+      },
+      legend: { top: 0, textStyle: { color: "rgba(237, 238, 233, 0.6)" } },
       grid: { left: 48, right: 24, top: 40, bottom: 32 },
-      xAxis: { type: "time" },
-      yAxis: { type: "value" },
+      xAxis: {
+        type: "time",
+        axisLine: { lineStyle: { color: "rgba(237, 238, 233, 0.2)" } },
+        axisLabel: { color: "rgba(237, 238, 233, 0.4)" },
+        splitLine: { show: false },
+      },
+      yAxis: {
+        type: "value",
+        axisLine: { show: false },
+        axisLabel: { color: "rgba(237, 238, 233, 0.4)" },
+        splitLine: { lineStyle: { color: "rgba(237, 238, 233, 0.08)" } },
+      },
       series: data.series.map((s) => ({
         name: s.unit ? `${s.label} (${s.unit})` : s.label,
         type: "line",
@@ -37,7 +56,7 @@ function ChartView({ data }: { data: GraphData }) {
     };
   }, [data]);
 
-  return <div ref={containerRef} className="chart-container" />;
+  return <div ref={containerRef} className="ls-chart-container" />;
 }
 
 type SensorRow = { sensorId: string; coefficient: string; position: number };
@@ -136,16 +155,16 @@ export function GraphsPage({ t, isAdmin }: { t: Dictionary; isAdmin: boolean }) 
   }
 
   return (
-    <section className="page-section">
-      <div className="panel">
-        <h2>{t.graphs.title}</h2>
+    <div className="ls-page-wide" style={{ width: "100%" }}>
+      <div className="ls-panel">
+        <h2 className="ls-panel-title">{t.graphs.title}</h2>
         {graphs.length === 0 ? (
-          <p>{t.graphs.noGraphs}</p>
+          <p className="ls-empty">{t.graphs.noGraphs}</p>
         ) : (
           <>
-            <div className="filter-bar">
-              <label>
-                {t.graphs.select}
+            <div className="ls-form-grid">
+              <label className="ls-field">
+                <span className="ls-field-label">{t.graphs.select}</span>
                 <select value={selectedId} onChange={(e) => setSelectedId(e.target.value)}>
                   {graphs.map((graph) => (
                     <option key={graph.id} value={graph.id}>
@@ -154,12 +173,12 @@ export function GraphsPage({ t, isAdmin }: { t: Dictionary; isAdmin: boolean }) 
                   ))}
                 </select>
               </label>
-              <label>
-                {t.history.from}
+              <label className="ls-field">
+                <span className="ls-field-label">{t.history.from}</span>
                 <input type="datetime-local" value={range.from} onChange={(e) => setRange({ ...range, from: e.target.value })} />
               </label>
-              <label>
-                {t.history.to}
+              <label className="ls-field">
+                <span className="ls-field-label">{t.history.to}</span>
                 <input type="datetime-local" value={range.to} onChange={(e) => setRange({ ...range, to: e.target.value })} />
               </label>
             </div>
@@ -169,10 +188,10 @@ export function GraphsPage({ t, isAdmin }: { t: Dictionary; isAdmin: boolean }) 
       </div>
 
       {isAdmin && (
-        <div className="panel">
-          <h2>{t.graphs.manageTitle}</h2>
-          <div className="table-scroll">
-            <table>
+        <div className="ls-panel">
+          <h2 className="ls-panel-title">{t.graphs.manageTitle}</h2>
+          <div className="ls-table-wrap">
+            <table className="ls-table">
               <thead>
                 <tr>
                   <th>{t.sensors.label}</th>
@@ -185,13 +204,15 @@ export function GraphsPage({ t, isAdmin }: { t: Dictionary; isAdmin: boolean }) 
                   <tr key={graph.id}>
                     <td>{graph.name}</td>
                     <td>{graph.sensors.length}</td>
-                    <td className="row-actions">
-                      <button type="button" onClick={() => startEdit(graph)}>
-                        {t.sensors.edit}
-                      </button>
-                      <button type="button" onClick={() => removeGraph(graph.id)}>
-                        {t.sensors.delete}
-                      </button>
+                    <td>
+                      <span className="ls-btn-row">
+                        <button type="button" className="ls-text-action" onClick={() => startEdit(graph)}>
+                          {t.sensors.edit}
+                        </button>
+                        <button type="button" className="ls-text-action ls-text-action--danger" onClick={() => removeGraph(graph.id)}>
+                          {t.sensors.delete}
+                        </button>
+                      </span>
                     </td>
                   </tr>
                 ))}
@@ -200,21 +221,21 @@ export function GraphsPage({ t, isAdmin }: { t: Dictionary; isAdmin: boolean }) 
           </div>
 
           {editingId === null ? (
-            <button type="button" onClick={startAdd}>
+            <button type="button" className="ls-btn ls-btn-primary" onClick={startAdd}>
               {t.graphs.add}
             </button>
           ) : (
-            <form className="sensor-form" onSubmit={submitForm}>
-              <label>
-                {t.graphs.name}
+            <form onSubmit={submitForm}>
+              <label className="ls-field" style={{ maxWidth: 360 }}>
+                <span className="ls-field-label">{t.graphs.name}</span>
                 <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
               </label>
 
-              <h3>{t.graphs.sensorsInGraph}</h3>
+              <h3 className="ls-panel-subtitle">{t.graphs.sensorsInGraph}</h3>
               {form.sensors.map((row, index) => (
-                <div className="filter-bar" key={index}>
-                  <label>
-                    {t.sensors.label}
+                <div className="ls-form-grid" key={index} style={{ alignItems: "flex-end" }}>
+                  <label className="ls-field">
+                    <span className="ls-field-label">{t.sensors.label}</span>
                     <select value={row.sensorId} onChange={(e) => updateSensorRow(index, { sensorId: e.target.value })}>
                       {sensors.map((sensor) => (
                         <option key={sensor.id} value={sensor.id}>
@@ -223,8 +244,8 @@ export function GraphsPage({ t, isAdmin }: { t: Dictionary; isAdmin: boolean }) 
                       ))}
                     </select>
                   </label>
-                  <label>
-                    {t.graphs.coefficient}
+                  <label className="ls-field">
+                    <span className="ls-field-label">{t.graphs.coefficient}</span>
                     <input
                       type="number"
                       step="any"
@@ -232,23 +253,25 @@ export function GraphsPage({ t, isAdmin }: { t: Dictionary; isAdmin: boolean }) 
                       onChange={(e) => updateSensorRow(index, { coefficient: e.target.value })}
                     />
                   </label>
-                  <button type="button" onClick={() => removeSensorRow(index)}>
+                  <button type="button" className="ls-text-action ls-text-action--danger" onClick={() => removeSensorRow(index)}>
                     {t.sensors.delete}
                   </button>
                 </div>
               ))}
-              <button type="button" onClick={addSensorRow} disabled={sensors.length === 0}>
+              <button type="button" className="ls-text-action" style={{ marginBottom: 20 }} onClick={addSensorRow} disabled={sensors.length === 0}>
                 {t.graphs.addSensor}
               </button>
 
               {formError && (
-                <p className="login-error" role="alert">
+                <p className="ls-error" role="alert">
                   {formError}
                 </p>
               )}
-              <div className="row-actions">
-                <button type="submit">{t.sensors.save}</button>
-                <button type="button" onClick={() => setEditingId(null)}>
+              <div className="ls-btn-row">
+                <button type="submit" className="ls-btn ls-btn-primary">
+                  {t.sensors.save}
+                </button>
+                <button type="button" className="ls-text-action" onClick={() => setEditingId(null)}>
                   {t.sensors.cancel}
                 </button>
               </div>
@@ -256,6 +279,6 @@ export function GraphsPage({ t, isAdmin }: { t: Dictionary; isAdmin: boolean }) 
           )}
         </div>
       )}
-    </section>
+    </div>
   );
 }

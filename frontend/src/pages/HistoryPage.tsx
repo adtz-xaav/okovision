@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { api, ApiError, type Graph, type Reading, type Sensor } from "../lib/api";
+import { SERIES_COLORS } from "../lib/seriesColors";
 import type { Dictionary } from "../locales/en";
 
 type RangeKey = "24h" | "7d" | "30d";
@@ -9,11 +10,6 @@ const RANGE_MS: Record<RangeKey, number> = {
   "7d": 7 * 24 * 60 * 60 * 1000,
   "30d": 30 * 24 * 60 * 60 * 1000,
 };
-
-// Muted qualitative palette for overlaying several readings on one chart.
-// Deliberately distinct from --ls-ember/--ls-moss, which stay reserved for
-// live/heat and efficiency states elsewhere in the app.
-const SERIES_COLORS = ["#8fa6bf", "#c9a66b", "#a97c9c", "#b5654f", "#7d9a97"];
 
 function formatValue(value: number): string {
   return Number.isInteger(value) ? String(value) : value.toFixed(1);
@@ -160,7 +156,7 @@ export function HistoryPage({ t, isAdmin }: { t: Dictionary; isAdmin: boolean })
       </div>
 
       {isAdmin && selectedIds.length > 0 && (
-        <button type="button" className="ls-text-action" onClick={saveView}>
+        <button type="button" className="ls-text-action" style={{ marginBottom: 20 }} onClick={saveView}>
           {t.history.saveView}
         </button>
       )}

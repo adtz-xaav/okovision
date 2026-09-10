@@ -221,49 +221,53 @@ export function SensorsPage({ t, language }: { t: Dictionary; language: Language
   }
 
   return (
-    <section className="page-section">
-      <div className="panel">
-        <h2>{t.sensors.boilerConnectionTitle}</h2>
-        <form className="inline-form" onSubmit={saveConnection}>
-          <label>
-            {t.sensors.boilerHost}
-            <input value={host} onChange={(e) => setHost(e.target.value)} placeholder="192.168.1.50" />
-          </label>
-          <label>
-            {t.sensors.boilerUsername}
-            <input value={username} onChange={(e) => setUsername(e.target.value)} />
-          </label>
-          <label>
-            {t.sensors.boilerPassword}
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder={hasCredentials ? t.sensors.boilerPasswordUnchanged : ""}
-            />
-          </label>
-          <button type="submit">{t.sensors.saveConnection}</button>
+    <div className="ls-page-wide" style={{ width: "100%" }}>
+      <div className="ls-panel">
+        <h2 className="ls-panel-title">{t.sensors.boilerConnectionTitle}</h2>
+        <form onSubmit={saveConnection}>
+          <div className="ls-form-grid">
+            <label className="ls-field">
+              <span className="ls-field-label">{t.sensors.boilerHost}</span>
+              <input value={host} onChange={(e) => setHost(e.target.value)} placeholder="192.168.1.50" />
+            </label>
+            <label className="ls-field">
+              <span className="ls-field-label">{t.sensors.boilerUsername}</span>
+              <input value={username} onChange={(e) => setUsername(e.target.value)} />
+            </label>
+            <label className="ls-field">
+              <span className="ls-field-label">{t.sensors.boilerPassword}</span>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder={hasCredentials ? t.sensors.boilerPasswordUnchanged : ""}
+              />
+            </label>
+          </div>
+          <button type="submit" className="ls-btn ls-btn-primary">
+            {t.sensors.saveConnection}
+          </button>
         </form>
-        <p className="field-hint">{t.sensors.boilerHostHint}</p>
-        <p className="field-hint">{t.sensors.boilerCredentialsHint}</p>
-        {connectionMessage && <p className="field-hint">{connectionMessage}</p>}
+        <p className="ls-hint">{t.sensors.boilerHostHint}</p>
+        <p className="ls-hint">{t.sensors.boilerCredentialsHint}</p>
+        {connectionMessage && <p className="ls-hint">{connectionMessage}</p>}
 
-        <button type="button" onClick={runIngest}>
+        <button type="button" className="ls-btn" onClick={runIngest}>
           {t.sensors.runIngestNow}
         </button>
-        {ingestMessage && <p className="field-hint">{ingestMessage}</p>}
+        {ingestMessage && <p className="ls-hint">{ingestMessage}</p>}
         {ingestError && (
-          <p className="login-error" role="alert">
+          <p className="ls-error" role="alert">
             {ingestError}
           </p>
         )}
 
-        <h3>{t.sensors.recentRuns}</h3>
+        <h3 className="ls-panel-subtitle">{t.sensors.recentRuns}</h3>
         {runs.length === 0 ? (
-          <p>{t.sensors.noRuns}</p>
+          <p className="ls-empty">{t.sensors.noRuns}</p>
         ) : (
-          <div className="table-scroll">
-            <table>
+          <div className="ls-table-wrap">
+            <table className="ls-table">
               <thead>
                 <tr>
                   <th>{t.sensors.runJob}</th>
@@ -287,10 +291,10 @@ export function SensorsPage({ t, language }: { t: Dictionary; language: Language
         )}
       </div>
 
-      <div className="panel">
-        <h2>{t.sensors.title}</h2>
-        <div className="table-scroll">
-          <table>
+      <div className="ls-panel">
+        <h2 className="ls-panel-title">{t.sensors.title}</h2>
+        <div className="ls-table-wrap">
+          <table className="ls-table">
             <thead>
               <tr>
                 <th>{t.sensors.key}</th>
@@ -309,13 +313,15 @@ export function SensorsPage({ t, language }: { t: Dictionary; language: Language
                   <td>{sensor.unit ?? "—"}</td>
                   <td>{sensor.correction}</td>
                   <td>{sensor.csvColumn ?? "—"}</td>
-                  <td className="row-actions">
-                    <button type="button" onClick={() => startEdit(sensor)}>
-                      {t.sensors.edit}
-                    </button>
-                    <button type="button" onClick={() => removeSensor(sensor.id)}>
-                      {t.sensors.delete}
-                    </button>
+                  <td>
+                    <span className="ls-btn-row">
+                      <button type="button" className="ls-text-action" onClick={() => startEdit(sensor)}>
+                        {t.sensors.edit}
+                      </button>
+                      <button type="button" className="ls-text-action ls-text-action--danger" onClick={() => removeSensor(sensor.id)}>
+                        {t.sensors.delete}
+                      </button>
+                    </span>
                   </td>
                 </tr>
               ))}
@@ -323,53 +329,57 @@ export function SensorsPage({ t, language }: { t: Dictionary; language: Language
           </table>
         </div>
 
-        {importMessage && <p className="field-hint">{importMessage}</p>}
+        {importMessage && <p className="ls-hint">{importMessage}</p>}
         {importError && (
-          <p className="login-error" role="alert">
+          <p className="ls-error" role="alert">
             {importError}
           </p>
         )}
 
         {editingId === null ? (
-          <div className="row-actions">
-            <button type="button" onClick={startAdd}>
+          <div className="ls-btn-row">
+            <button type="button" className="ls-btn ls-btn-primary" onClick={startAdd}>
               {t.sensors.add}
             </button>
-            <button type="button" onClick={importFromBoiler}>
+            <button type="button" className="ls-btn" onClick={importFromBoiler}>
               {t.sensors.importFromBoiler}
             </button>
           </div>
         ) : (
-          <form className="sensor-form" onSubmit={submitForm}>
-            <label>
-              {t.sensors.key}
-              <input value={form.key} onChange={(e) => setForm({ ...form, key: e.target.value })} required />
-            </label>
-            <label>
-              {t.sensors.label}
-              <input value={form.label} onChange={(e) => setForm({ ...form, label: e.target.value })} required />
-            </label>
-            <label>
-              {t.sensors.unit}
-              <input value={form.unit} onChange={(e) => setForm({ ...form, unit: e.target.value })} />
-            </label>
-            <label>
-              {t.sensors.correction}
-              <input type="number" step="any" value={form.correction} onChange={(e) => setForm({ ...form, correction: e.target.value })} />
-            </label>
-            <label>
-              {t.sensors.csvColumn}
-              <input type="number" min="0" value={form.csvColumn} onChange={(e) => setForm({ ...form, csvColumn: e.target.value })} />
-            </label>
-            <p className="field-hint">{t.sensors.csvColumnHint}</p>
+          <form onSubmit={submitForm}>
+            <div className="ls-form-grid">
+              <label className="ls-field">
+                <span className="ls-field-label">{t.sensors.key}</span>
+                <input value={form.key} onChange={(e) => setForm({ ...form, key: e.target.value })} required />
+              </label>
+              <label className="ls-field">
+                <span className="ls-field-label">{t.sensors.label}</span>
+                <input value={form.label} onChange={(e) => setForm({ ...form, label: e.target.value })} required />
+              </label>
+              <label className="ls-field">
+                <span className="ls-field-label">{t.sensors.unit}</span>
+                <input value={form.unit} onChange={(e) => setForm({ ...form, unit: e.target.value })} />
+              </label>
+              <label className="ls-field">
+                <span className="ls-field-label">{t.sensors.correction}</span>
+                <input type="number" step="any" value={form.correction} onChange={(e) => setForm({ ...form, correction: e.target.value })} />
+              </label>
+              <label className="ls-field">
+                <span className="ls-field-label">{t.sensors.csvColumn}</span>
+                <input type="number" min="0" value={form.csvColumn} onChange={(e) => setForm({ ...form, csvColumn: e.target.value })} />
+              </label>
+            </div>
+            <p className="ls-hint">{t.sensors.csvColumnHint}</p>
             {formError && (
-              <p className="login-error" role="alert">
+              <p className="ls-error" role="alert">
                 {formError}
               </p>
             )}
-            <div className="row-actions">
-              <button type="submit">{t.sensors.save}</button>
-              <button type="button" onClick={() => setEditingId(null)}>
+            <div className="ls-btn-row">
+              <button type="submit" className="ls-btn ls-btn-primary">
+                {t.sensors.save}
+              </button>
+              <button type="button" className="ls-text-action" onClick={() => setEditingId(null)}>
                 {t.sensors.cancel}
               </button>
             </div>
@@ -377,10 +387,10 @@ export function SensorsPage({ t, language }: { t: Dictionary; language: Language
         )}
       </div>
 
-      <div className="panel">
-        <h2>{t.sensors.liveTagsTitle}</h2>
-        <div className="table-scroll">
-          <table>
+      <div className="ls-panel">
+        <h2 className="ls-panel-title">{t.sensors.liveTagsTitle}</h2>
+        <div className="ls-table-wrap">
+          <table className="ls-table">
             <thead>
               <tr>
                 <th>{t.sensors.key}</th>
@@ -397,17 +407,19 @@ export function SensorsPage({ t, language }: { t: Dictionary; language: Language
                 <tr key={liveTag.id}>
                   <td>{liveTag.key}</td>
                   <td>{liveTag.label}</td>
-                  <td className="mono-cell">{liveTag.tag}</td>
+                  <td className="ls-table-mono">{liveTag.tag}</td>
                   <td>{liveTag.writable ? "✓" : "—"}</td>
                   <td>{liveTag.divisor}</td>
                   <td>{liveTag.unit ?? "—"}</td>
-                  <td className="row-actions">
-                    <button type="button" onClick={() => startEditLiveTag(liveTag)}>
-                      {t.sensors.edit}
-                    </button>
-                    <button type="button" onClick={() => removeLiveTag(liveTag.id)}>
-                      {t.sensors.delete}
-                    </button>
+                  <td>
+                    <span className="ls-btn-row">
+                      <button type="button" className="ls-text-action" onClick={() => startEditLiveTag(liveTag)}>
+                        {t.sensors.edit}
+                      </button>
+                      <button type="button" className="ls-text-action ls-text-action--danger" onClick={() => removeLiveTag(liveTag.id)}>
+                        {t.sensors.delete}
+                      </button>
+                    </span>
                   </td>
                 </tr>
               ))}
@@ -416,68 +428,89 @@ export function SensorsPage({ t, language }: { t: Dictionary; language: Language
         </div>
 
         {editingLiveTagId === null ? (
-          <button type="button" onClick={startAddLiveTag}>
+          <button type="button" className="ls-btn ls-btn-primary" onClick={startAddLiveTag}>
             {t.sensors.liveTagAdd}
           </button>
         ) : (
-          <form className="sensor-form" onSubmit={submitLiveTagForm}>
-            <label>
-              {t.sensors.key}
-              <input value={liveTagForm.key} onChange={(e) => setLiveTagForm({ ...liveTagForm, key: e.target.value })} required />
-            </label>
-            <label>
-              {t.sensors.label}
-              <input value={liveTagForm.label} onChange={(e) => setLiveTagForm({ ...liveTagForm, label: e.target.value })} required />
-            </label>
-            <label>
-              {t.sensors.liveTagPath}
-              <input
-                value={liveTagForm.tag}
-                onChange={(e) => setLiveTagForm({ ...liveTagForm, tag: e.target.value })}
-                placeholder="CAPPL:LOCAL.oekomode"
-                required
-              />
-            </label>
-            <label>
-              <input
-                type="checkbox"
-                checked={liveTagForm.writable}
-                onChange={(e) => setLiveTagForm({ ...liveTagForm, writable: e.target.checked })}
-              />
-              {" " + t.sensors.liveTagWritable}
-            </label>
-            <label>
-              {t.sensors.liveTagDivisor}
-              <input type="number" step="any" value={liveTagForm.divisor} onChange={(e) => setLiveTagForm({ ...liveTagForm, divisor: e.target.value })} />
-            </label>
-            <label>
-              {t.sensors.unit}
-              <input value={liveTagForm.unit} onChange={(e) => setLiveTagForm({ ...liveTagForm, unit: e.target.value })} />
-            </label>
-            <label>
-              {t.sensors.liveTagMin}
-              <input type="number" step="any" value={liveTagForm.minValue} onChange={(e) => setLiveTagForm({ ...liveTagForm, minValue: e.target.value })} />
-            </label>
-            <label>
-              {t.sensors.liveTagMax}
-              <input type="number" step="any" value={liveTagForm.maxValue} onChange={(e) => setLiveTagForm({ ...liveTagForm, maxValue: e.target.value })} />
-            </label>
-            <p className="field-hint">{t.sensors.liveTagHint}</p>
-            <p className="field-hint">{t.sensors.liveTagBoundsHint}</p>
+          <form onSubmit={submitLiveTagForm}>
+            <div className="ls-form-grid">
+              <label className="ls-field">
+                <span className="ls-field-label">{t.sensors.key}</span>
+                <input value={liveTagForm.key} onChange={(e) => setLiveTagForm({ ...liveTagForm, key: e.target.value })} required />
+              </label>
+              <label className="ls-field">
+                <span className="ls-field-label">{t.sensors.label}</span>
+                <input value={liveTagForm.label} onChange={(e) => setLiveTagForm({ ...liveTagForm, label: e.target.value })} required />
+              </label>
+              <label className="ls-field">
+                <span className="ls-field-label">{t.sensors.liveTagPath}</span>
+                <input
+                  value={liveTagForm.tag}
+                  onChange={(e) => setLiveTagForm({ ...liveTagForm, tag: e.target.value })}
+                  placeholder="CAPPL:LOCAL.oekomode"
+                  required
+                />
+              </label>
+              <label className="ls-field ls-field--checkbox">
+                <input
+                  type="checkbox"
+                  checked={liveTagForm.writable}
+                  onChange={(e) => setLiveTagForm({ ...liveTagForm, writable: e.target.checked })}
+                />
+                <span className="ls-field-label" style={{ margin: 0 }}>
+                  {t.sensors.liveTagWritable}
+                </span>
+              </label>
+              <label className="ls-field">
+                <span className="ls-field-label">{t.sensors.liveTagDivisor}</span>
+                <input
+                  type="number"
+                  step="any"
+                  value={liveTagForm.divisor}
+                  onChange={(e) => setLiveTagForm({ ...liveTagForm, divisor: e.target.value })}
+                />
+              </label>
+              <label className="ls-field">
+                <span className="ls-field-label">{t.sensors.unit}</span>
+                <input value={liveTagForm.unit} onChange={(e) => setLiveTagForm({ ...liveTagForm, unit: e.target.value })} />
+              </label>
+              <label className="ls-field">
+                <span className="ls-field-label">{t.sensors.liveTagMin}</span>
+                <input
+                  type="number"
+                  step="any"
+                  value={liveTagForm.minValue}
+                  onChange={(e) => setLiveTagForm({ ...liveTagForm, minValue: e.target.value })}
+                />
+              </label>
+              <label className="ls-field">
+                <span className="ls-field-label">{t.sensors.liveTagMax}</span>
+                <input
+                  type="number"
+                  step="any"
+                  value={liveTagForm.maxValue}
+                  onChange={(e) => setLiveTagForm({ ...liveTagForm, maxValue: e.target.value })}
+                />
+              </label>
+            </div>
+            <p className="ls-hint">{t.sensors.liveTagHint}</p>
+            <p className="ls-hint">{t.sensors.liveTagBoundsHint}</p>
             {liveTagFormError && (
-              <p className="login-error" role="alert">
+              <p className="ls-error" role="alert">
                 {liveTagFormError}
               </p>
             )}
-            <div className="row-actions">
-              <button type="submit">{t.sensors.save}</button>
-              <button type="button" onClick={() => setEditingLiveTagId(null)}>
+            <div className="ls-btn-row">
+              <button type="submit" className="ls-btn ls-btn-primary">
+                {t.sensors.save}
+              </button>
+              <button type="button" className="ls-text-action" onClick={() => setEditingLiveTagId(null)}>
                 {t.sensors.cancel}
               </button>
             </div>
           </form>
         )}
       </div>
-    </section>
+    </div>
   );
 }
