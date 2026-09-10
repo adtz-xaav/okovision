@@ -1,0 +1,606 @@
+/* Living System design language — replaces the top-level app shell and the
+   daily-use pages (sign-in, now, trends, history, settings hub). Admin CRUD
+   pages (Sensors, Graphs, Synthesis config) keep using App.css unchanged and
+   are wrapped in .ls-legacy-frame when opened from Settings. */
+
+:root {
+  --ls-ash: #17181a;
+  --ls-bark: #3a342e;
+  --ls-ember: #e8703a;
+  --ls-moss: #6b7f4f;
+  --ls-mist: #edeeE9;
+  --ls-hero-size: clamp(200px, 40vmin, 320px);
+}
+
+.ls-shell {
+  min-height: 100dvh;
+  background: var(--ls-ash);
+  color: var(--ls-mist);
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  display: flex;
+  flex-direction: column;
+}
+
+.ls-shell a {
+  color: var(--ls-ember);
+}
+.ls-shell a:hover {
+  color: rgba(232, 112, 58, 0.8);
+}
+
+/* ---------- top bar ---------- */
+
+.ls-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 28px 0;
+  flex-shrink: 0;
+}
+
+.ls-wordmark {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ls-live-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--ls-ember);
+  box-shadow: 0 0 10px 3px rgba(232, 112, 58, 0.5);
+  flex-shrink: 0;
+}
+
+.ls-wordmark-text {
+  color: rgba(237, 238, 233, 0.55);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.ls-topbar-clock {
+  color: rgba(237, 238, 233, 0.35);
+  font-size: 13px;
+}
+
+/* ---------- content ---------- */
+
+.ls-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px 28px 8px;
+  display: flex;
+  flex-direction: column;
+}
+
+.ls-page-title {
+  color: var(--ls-mist);
+  font-size: 22px;
+  font-weight: 300;
+  margin: 8px 0 24px;
+}
+
+.ls-error {
+  color: var(--ls-ember);
+  font-size: 14px;
+  margin-bottom: 16px;
+}
+
+.ls-empty {
+  color: rgba(237, 238, 233, 0.5);
+  font-size: 15px;
+  line-height: 1.6;
+  max-width: 420px;
+  margin: 40px auto 0;
+  text-align: center;
+}
+
+/* ---------- hero + list layout ---------- */
+
+.ls-hero-wrap {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 28px;
+  justify-content: center;
+}
+
+.ls-hero {
+  position: relative;
+  width: var(--ls-hero-size);
+  height: var(--ls-hero-size);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.ls-hero-glow {
+  position: absolute;
+  inset: 4%;
+  border-radius: 50%;
+}
+.ls-hero-glow--ember {
+  background: radial-gradient(circle, rgba(232, 112, 58, 0.28), rgba(232, 112, 58, 0) 70%);
+}
+.ls-hero-glow--moss {
+  background: radial-gradient(circle, rgba(107, 127, 79, 0.3), rgba(107, 127, 79, 0) 70%);
+}
+
+.ls-hero-ring {
+  position: absolute;
+  inset: 6%;
+  width: 88%;
+  height: 88%;
+}
+
+.ls-hero-value-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  text-align: center;
+}
+
+.ls-hero-value {
+  font-weight: 300;
+  font-size: clamp(48px, 13vmin, 100px);
+  color: var(--ls-mist);
+  line-height: 1;
+}
+.ls-hero-value--moss {
+  color: var(--ls-moss);
+}
+
+.ls-hero-label {
+  color: rgba(237, 238, 233, 0.55);
+  font-size: 15px;
+}
+
+.ls-hero-caption {
+  color: rgba(237, 238, 233, 0.45);
+  font-size: 14px;
+  text-align: center;
+  line-height: 1.5;
+}
+
+.ls-hero-status {
+  color: var(--ls-ember);
+  font-size: 14px;
+  text-align: center;
+}
+
+.ls-stepper {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.ls-stepper-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid rgba(237, 238, 233, 0.25);
+  background: transparent;
+  color: var(--ls-mist);
+  font-size: 18px;
+  font-family: inherit;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+.ls-stepper-btn:hover {
+  border-color: rgba(237, 238, 233, 0.5);
+}
+.ls-stepper-btn:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+/* quiet reading/settings list, reused across Now/Trends/Settings */
+
+.ls-list {
+  width: 100%;
+  max-width: 420px;
+}
+
+.ls-list-label {
+  color: rgba(237, 238, 233, 0.4);
+  font-size: 12px;
+  margin-bottom: 6px;
+}
+
+.ls-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 0;
+  border-top: 1px solid rgba(237, 238, 233, 0.08);
+}
+.ls-list > .ls-row:last-child {
+  border-bottom: 1px solid rgba(237, 238, 233, 0.08);
+}
+
+.ls-row-label {
+  color: rgba(237, 238, 233, 0.55);
+  font-size: 15px;
+}
+
+.ls-row-value {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: rgba(237, 238, 233, 0.78);
+  font-size: 15px;
+}
+
+.ls-row-stepper {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ls-row-stepper button {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 1px solid rgba(237, 238, 233, 0.25);
+  background: transparent;
+  color: var(--ls-mist);
+  font-size: 14px;
+  font-family: inherit;
+  cursor: pointer;
+  line-height: 1;
+}
+.ls-row-stepper button:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.ls-chevron {
+  flex-shrink: 0;
+}
+
+/* settings-style rows with subtitle + status dot */
+
+.ls-srow {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 18px 0;
+  border-top: 1px solid rgba(237, 238, 233, 0.08);
+  background: none;
+  border-left: none;
+  border-right: none;
+  border-bottom: none;
+  width: 100%;
+  text-align: left;
+  color: inherit;
+  font-family: inherit;
+  cursor: pointer;
+}
+.ls-settings-list > .ls-srow:last-child {
+  border-bottom: 1px solid rgba(237, 238, 233, 0.08);
+}
+
+.ls-srow-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: rgba(237, 238, 233, 0.4);
+}
+.ls-srow-dot--ember {
+  background: var(--ls-ember);
+}
+
+.ls-srow-body {
+  flex: 1;
+}
+.ls-srow-title {
+  color: rgba(237, 238, 233, 0.85);
+  font-size: 16px;
+}
+.ls-srow-subtitle {
+  color: rgba(237, 238, 233, 0.4);
+  font-size: 13px;
+  margin-top: 2px;
+}
+
+/* ---------- chart ---------- */
+
+.ls-chart-caption {
+  color: rgba(237, 238, 233, 0.4);
+  font-size: 12px;
+  margin-bottom: 10px;
+}
+
+.ls-chart-endpoints {
+  display: flex;
+  justify-content: space-between;
+  color: rgba(237, 238, 233, 0.4);
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+/* ---------- history range tabs ---------- */
+
+.ls-range-tabs {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+.ls-range-tab {
+  background: none;
+  border: none;
+  border-bottom: 1px solid transparent;
+  color: rgba(237, 238, 233, 0.35);
+  font-size: 14px;
+  font-family: inherit;
+  padding: 0 0 6px;
+  cursor: pointer;
+}
+.ls-range-tab--active {
+  color: var(--ls-mist);
+  border-bottom-color: var(--ls-mist);
+}
+
+.ls-sensor-picker {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  margin-bottom: 20px;
+}
+.ls-sensor-chip {
+  flex-shrink: 0;
+  background: none;
+  border: 1px solid rgba(237, 238, 233, 0.18);
+  border-radius: 999px;
+  color: rgba(237, 238, 233, 0.55);
+  font-family: inherit;
+  font-size: 14px;
+  padding: 8px 16px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.ls-sensor-chip--active {
+  color: var(--ls-ash);
+  background: var(--ls-mist);
+  border-color: var(--ls-mist);
+}
+
+/* ---------- bottom nav ---------- */
+
+.ls-bottomnav {
+  display: flex;
+  justify-content: center;
+  gap: 36px;
+  padding: 14px 0 max(14px, env(safe-area-inset-bottom));
+  flex-shrink: 0;
+  flex-wrap: wrap;
+}
+
+.ls-navitem {
+  background: none;
+  border: none;
+  font-family: inherit;
+  font-size: 14px;
+  color: rgba(237, 238, 233, 0.4);
+  cursor: pointer;
+  padding: 4px 2px;
+}
+.ls-navitem--active {
+  color: var(--ls-ember);
+  font-weight: 600;
+}
+
+/* ---------- sign-in ---------- */
+
+.ls-signin {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.ls-signin-card {
+  width: 100%;
+  max-width: 340px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.ls-signin-heading {
+  width: 100%;
+  color: var(--ls-mist);
+  font-size: 26px;
+  font-weight: 300;
+  margin: 0 0 36px;
+}
+
+.ls-field {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 24px;
+}
+.ls-field-label {
+  color: rgba(237, 238, 233, 0.45);
+  font-size: 12px;
+}
+.ls-field input {
+  width: 100%;
+  box-sizing: border-box;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid rgba(237, 238, 233, 0.2);
+  color: var(--ls-mist);
+  font-size: 16px;
+  font-family: inherit;
+  padding: 6px 0;
+  outline: none;
+}
+.ls-field input::placeholder {
+  color: rgba(237, 238, 233, 0.28);
+}
+
+.ls-button {
+  width: 100%;
+  padding: 13px 0;
+  border-radius: 3px;
+  border: 1px solid rgba(237, 238, 233, 0.35);
+  background: transparent;
+  color: var(--ls-mist);
+  font-size: 15px;
+  font-family: inherit;
+  font-weight: 500;
+  cursor: pointer;
+  margin-bottom: 24px;
+}
+.ls-button:hover {
+  border-color: rgba(237, 238, 233, 0.6);
+}
+
+.ls-signin-switch {
+  color: rgba(237, 238, 233, 0.4);
+  font-size: 13px;
+  background: none;
+  border: none;
+  font-family: inherit;
+  cursor: pointer;
+  text-align: center;
+}
+.ls-signin-switch span {
+  color: rgba(237, 238, 233, 0.65);
+}
+
+/* ---------- idle overlay ---------- */
+
+.ls-idle {
+  position: fixed;
+  inset: 0;
+  background: var(--ls-ash);
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.ls-idle-glow {
+  position: absolute;
+  left: 50%;
+  top: 46%;
+  width: min(640px, 80vw);
+  height: min(640px, 80vw);
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(232, 112, 58, 0.16), rgba(232, 112, 58, 0) 68%);
+}
+
+.ls-idle-time {
+  font-weight: 200;
+  font-size: clamp(56px, 14vw, 150px);
+  color: rgba(237, 238, 233, 0.32);
+  line-height: 1;
+  letter-spacing: -1px;
+}
+
+.ls-idle-status {
+  margin-top: 14px;
+  color: rgba(232, 112, 58, 0.55);
+  font-size: 16px;
+  font-weight: 300;
+  text-align: center;
+}
+
+.ls-idle-brand {
+  position: absolute;
+  left: 28px;
+  bottom: 20px;
+  color: rgba(237, 238, 233, 0.18);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+/* ---------- legacy admin pages wrapped from Settings ---------- */
+
+.ls-legacy-frame {
+  background: var(--ls-mist);
+  border-radius: 6px;
+  padding: 20px;
+  color: #1b2024;
+}
+.ls-legacy-back {
+  background: none;
+  border: none;
+  color: rgba(237, 238, 233, 0.55);
+  font-family: inherit;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 20px;
+  padding: 0;
+}
+
+/* ---------- responsive: two-column layout for landscape phones,
+   tablet landscape, and desktop. Portrait devices (regardless of raw
+   width — a portrait tablet included) stay single-column. ---------- */
+
+@media (min-width: 700px) and (min-aspect-ratio: 1/1) {
+  .ls-content {
+    padding: 28px 44px 12px;
+  }
+
+  .ls-hero-wrap {
+    flex-direction: row;
+    align-items: center;
+    gap: 56px;
+    max-width: 1100px;
+    margin: 0 auto;
+    width: 100%;
+  }
+
+  .ls-page-wide {
+    max-width: 1100px;
+    margin: 0 auto;
+    width: 100%;
+  }
+
+  .ls-list {
+    flex: 1;
+    max-width: 420px;
+  }
+}
+
+/* short viewports (landscape phones) — compact vertical rhythm */
+@media (max-height: 480px) {
+  :root {
+    --ls-hero-size: clamp(160px, 34vmin, 220px);
+  }
+  .ls-topbar {
+    padding: 12px 24px 0;
+  }
+  .ls-content {
+    padding: 12px 24px 4px;
+  }
+  .ls-page-title {
+    margin: 4px 0 12px;
+  }
+  .ls-bottomnav {
+    padding-top: 8px;
+  }
+}

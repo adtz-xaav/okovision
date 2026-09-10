@@ -19,11 +19,43 @@ export interface Dictionary {
     logout: string;
   };
   nav: {
+    now: string;
+    trends: string;
     history: string;
-    live: string;
-    graphs: string;
-    synthesis: string;
-    sensors: string;
+    settings: string;
+  };
+  now: {
+    moreReadings: string;
+    adjustHint: string;
+    setError: string;
+  };
+  idle: {
+    status: string;
+  };
+  trends: {
+    title: string;
+    moreEfficient: string;
+    lessEfficient: string;
+    vsLastSeason: string;
+    notEnoughData: string;
+    seasonSoFar: string;
+    pellets: string;
+    cycles: string;
+    degreeDays: string;
+    dailyTrend: string;
+    noTrendData: string;
+  };
+  settingsHub: {
+    title: string;
+    graphsRow: string;
+    graphsSubtitle: string;
+    sensorsRow: string;
+    sensorsSubtitle: string;
+    synthesisRow: string;
+    synthesisSubtitle: string;
+    account: string;
+    language: string;
+    back: string;
   };
   history: {
     sensorLabel: string;
@@ -34,6 +66,10 @@ export interface Dictionary {
     value: string;
     noReadings: string;
     selectSensorPrompt: string;
+    last24h: string;
+    last7d: string;
+    last30d: string;
+    rangeCaption: string;
   };
   live: {
     label: string;
@@ -158,11 +194,43 @@ export const en: Dictionary = {
     logout: "Log out",
   },
   nav: {
+    now: "Now",
+    trends: "Trends",
     history: "History",
-    live: "Live",
-    graphs: "Graphs",
-    synthesis: "Reports",
-    sensors: "Sensors",
+    settings: "Settings",
+  },
+  now: {
+    moreReadings: "More readings",
+    adjustHint: "Tap + or − to adjust.",
+    setError: "Couldn't send that to the boiler. Try again.",
+  },
+  idle: {
+    status: "{label} at {value}{unit}",
+  },
+  trends: {
+    title: "Trends",
+    moreEfficient: "more efficient than last season",
+    lessEfficient: "less efficient than last season",
+    vsLastSeason: "vs. last season",
+    notEnoughData: "Not enough seasons yet to compare.",
+    seasonSoFar: "This season so far",
+    pellets: "Pellets used",
+    cycles: "Burner cycles",
+    degreeDays: "Degree-days",
+    dailyTrend: "Pellets used, day by day",
+    noTrendData: "No consumption data for the last 7 days yet.",
+  },
+  settingsHub: {
+    title: "Settings",
+    graphsRow: "Graphs",
+    graphsSubtitle: "Custom multi-sensor charts",
+    sensorsRow: "Sensors & boiler connection",
+    sensorsSubtitle: "Sensor mapping, live tags, boiler login",
+    synthesisRow: "Seasons & synthesis settings",
+    synthesisSubtitle: "Seasons, silo deliveries, synthesis config",
+    account: "Account",
+    language: "Language",
+    back: "Back",
   },
   history: {
     sensorLabel: "Sensor",
@@ -173,6 +241,10 @@ export const en: Dictionary = {
     value: "Value",
     noReadings: "No readings for this sensor in the selected range.",
     selectSensorPrompt: "Choose a sensor to see its readings.",
+    last24h: "24 hours",
+    last7d: "7 days",
+    last30d: "30 days",
+    rangeCaption: "Between {min} and {max} over the last {range}.",
   },
   live: {
     label: "Value",

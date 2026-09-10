@@ -1,22 +1,32 @@
 import { useEffect, useState } from "react";
 import "./App.css";
+import "./styles/living.css";
 import { api, type SessionUser } from "./lib/api";
-import { format, useLocale } from "./hooks/useLocale";
+import { useLocale } from "./hooks/useLocale";
 import { LoginPage } from "./pages/LoginPage";
+import { NowPage } from "./pages/NowPage";
+import { TrendsPage } from "./pages/TrendsPage";
 import { HistoryPage } from "./pages/HistoryPage";
-import { LivePage } from "./pages/LivePage";
-import { GraphsPage } from "./pages/GraphsPage";
-import { SynthesisPage } from "./pages/SynthesisPage";
-import { SensorsPage } from "./pages/SensorsPage";
+import { SettingsPage } from "./pages/SettingsPage";
+import { IdleOverlay } from "./components/IdleOverlay";
 
 type AuthState = "checking" | "anonymous" | "authenticated";
-type Tab = "history" | "live" | "graphs" | "synthesis" | "sensors";
+type Tab = "now" | "trends" | "history" | "settings";
+
+function Clock() {
+  const [now, setNow] = useState(() => new Date());
+  useEffect(() => {
+    const interval = setInterval(() => setNow(new Date()), 30_000);
+    return () => clearInterval(interval);
+  }, []);
+  return <span className="ls-topbar-clock">{now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>;
+}
 
 function App() {
   const { language, setLanguage, t } = useLocale();
   const [authState, setAuthState] = useState<AuthState>("checking");
   const [user, setUser] = useState<SessionUser | null>(null);
-  const [tab, setTab] = useState<Tab>("history");
+  const [tab, setTab] = useState<Tab>("now");
 
   useEffect(() => {
     document.documentElement.lang = language;
@@ -38,23 +48,13 @@ function App() {
     setAuthState("anonymous");
   }
 
-  return (
-    <div className="app-shell">
-      <header className="app-header">
-        <span className="app-name">{t.appName}</span>
-        <div className="language-switch">
-          <button className={language === "en" ? "active" : ""} onClick={() => setLanguage("en")}>
-            EN
-          </button>
-          <button className={language === "fr" ? "active" : ""} onClick={() => setLanguage("fr")}>
-            FR
-          </button>
-        </div>
-      </header>
+  if (authState === "checking") {
+    return <div className="ls-shell" />;
+  }
 
-      {authState === "checking" && null}
-
-      {authState === "anonymous" && (
+  if (authState === "anonymous") {
+    return (
+      <div className="ls-shell">
         <LoginPage
           t={t}
           onAuthenticated={(loggedInUser) => {
@@ -62,42 +62,63 @@ function App() {
             setAuthState("authenticated");
           }}
         />
-      )}
+      </div>
+    );
+  }
 
-      {authState === "authenticated" && user && (
-        <>
-          <div className="session-bar">
-            <nav className="tab-nav">
-              <button className={tab === "history" ? "active" : ""} onClick={() => setTab("history")}>
-                {t.nav.history}
-              </button>
-              <button className={tab === "live" ? "active" : ""} onClick={() => setTab("live")}>
-                {t.nav.live}
-              </button>
-              <button className={tab === "graphs" ? "active" : ""} onClick={() => setTab("graphs")}>
-                {t.nav.graphs}
-              </button>
-              <button className={tab === "synthesis" ? "active" : ""} onClick={() => setTab("synthesis")}>
-                {t.nav.synthesis}
-              </button>
-              {user.role === "ADMIN" && (
-                <button className={tab === "sensors" ? "active" : ""} onClick={() => setTab("sensors")}>
-                  {t.nav.sensors}
-                </button>
-              )}
-            </nav>
-            <span>{format(t.session.signedInAs, { email: user.email, role: user.role })}</span>
-            <button onClick={handleLogout}>{t.session.logout}</button>
-          </div>
-          <main className="dashboard">
-            {tab === "history" && <HistoryPage t={t} language={language} />}
-            {tab === "live" && <LivePage t={t} isAdmin={user.role === "ADMIN"} />}
-            {tab === "graphs" && <GraphsPage t={t} isAdmin={user.role === "ADMIN"} />}
-            {tab === "synthesis" && <SynthesisPage t={t} isAdmin={user.role === "ADMIN"} />}
-            {tab === "sensors" && user.role === "ADMIN" && <SensorsPage t={t} language={language} />}
-          </main>
-        </>
-      )}
+  if (!user) return null;
+
+  const isAdmin = user.role === "ADMIN";
+  const pageTitle = tab === "now" ? t.nav.now : tab === "trends" ? t.nav.trends : tab === "history" ? t.nav.history : t.nav.settings;
+
+  return (
+    <div className="ls-shell">
+      <IdleOverlay t={t} />
+
+      <div className="ls-topbar">
+        <div className="ls-wordmark">
+          <span className="ls-live-dot" />
+          <span className="ls-wordmark-text">{t.appName}</span>
+        </div>
+        <Clock />
+      </div>
+
+      <main className="ls-content">
+        <h1 className="ls-page-title">{pageTitle}</h1>
+        {tab === "now" && <NowPage t={t} isAdmin={isAdmin} />}
+        {tab === "trends" && <TrendsPage t={t} />}
+        {tab === "history" && <HistoryPage t={t} />}
+        {tab === "settings" && (
+          <SettingsPage t={t} language={language} setLanguage={setLanguage} isAdmin={isAdmin} user={user} onLogout={handleLogout} />
+        )}
+      </main>
+
+      <nav className="ls-bottomnav">
+        <button type="button" className={`ls-navitem${tab === "now" ? " ls-navitem--active" : ""}`} onClick={() => setTab("now")}>
+          {t.nav.now}
+        </button>
+        <button
+          type="button"
+          className={`ls-navitem${tab === "trends" ? " ls-navitem--active" : ""}`}
+          onClick={() => setTab("trends")}
+        >
+          {t.nav.trends}
+        </button>
+        <button
+          type="button"
+          className={`ls-navitem${tab === "history" ? " ls-navitem--active" : ""}`}
+          onClick={() => setTab("history")}
+        >
+          {t.nav.history}
+        </button>
+        <button
+          type="button"
+          className={`ls-navitem${tab === "settings" ? " ls-navitem--active" : ""}`}
+          onClick={() => setTab("settings")}
+        >
+          {t.nav.settings}
+        </button>
+      </nav>
     </div>
   );
 }
