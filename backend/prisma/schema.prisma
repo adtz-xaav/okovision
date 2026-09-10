@@ -37,6 +37,13 @@ model Sensor {
   updatedAt  DateTime        @updatedAt
   readings   SensorReading[]
   graphLinks GraphSensor[]
+
+  // Optional roles a sensor can play in the daily synthesis calculation (see
+  // SynthesisConfig) — a sensor plays at most one such role at a time.
+  synthesisAsOutdoorTemp  SynthesisConfig? @relation("SynthesisOutdoorTemp")
+  synthesisAsAugerRun     SynthesisConfig? @relation("SynthesisAugerRun")
+  synthesisAsAugerPause   SynthesisConfig? @relation("SynthesisAugerPause")
+  synthesisAsBurnerCycle  SynthesisConfig? @relation("SynthesisBurnerCycle")
 }
 
 // Singleton row (id is always "singleton") holding how to reach the boiler on the LAN.
@@ -111,10 +118,61 @@ model Season {
 }
 
 model SiloEvent {
-  id        String   @id @default(uuid())
+  id         String   @id @default(uuid())
   occurredAt DateTime
-  note      String?
+  quantityKg Float
+  note       String?
+  createdAt  DateTime @default(now())
+}
+
+// Singleton row (id is always "singleton") designating which sensors feed the daily
+// synthesis calculation — the boiler exposes auger run/pause time and a burner-cycle
+// counter as ordinary sensors, so rather than hardcoding sensor keys (fragile — an admin
+// could rename or remap them), the admin explicitly picks the sensor playing each role,
+// mirroring how the legacy app looked sensors up by a fixed "type" instead of a display
+// name. Left unconfigured, the daily synthesis job simply skips whichever metrics need a
+// role that isn't set yet, rather than failing outright.
+model SynthesisConfig {
+  id String @id @default("singleton")
+
+  outdoorTempSensorId String? @unique
+  outdoorTempSensor   Sensor? @relation("SynthesisOutdoorTemp", fields: [outdoorTempSensorId], references: [id])
+
+  // Pellet consumption is derived from the auger's duty cycle each logging interval:
+  // runSeconds / (runSeconds + pauseSeconds), summed across the day and scaled by
+  // pelletWeightPerMinuteGrams — same formula the legacy app used, since it's the only
+  // consumption signal the boiler actually exposes (there's no pellet flow sensor).
+  augerRunSensorId   String? @unique
+  augerRunSensor     Sensor? @relation("SynthesisAugerRun", fields: [augerRunSensorId], references: [id])
+  augerPauseSensorId String? @unique
+  augerPauseSensor   Sensor? @relation("SynthesisAugerPause", fields: [augerPauseSensorId], references: [id])
+
+  burnerCycleSensorId String? @unique
+  burnerCycleSensor   Sensor? @relation("SynthesisBurnerCycle", fields: [burnerCycleSensorId], references: [id])
+
+  pelletWeightPerMinuteGrams Float @default(0)
+  // Reference temperature for heating degree-days (DJU): dju = max(0, referenceTempC - avg(dayMax, dayMin)).
+  referenceTempC             Float @default(18)
+  // Heated floor area, for the g-of-pellet-per-degree-day-per-m² efficiency metric on season reports.
+  houseSurfaceM2             Float @default(0)
+
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// One row per calendar day (id is "YYYY-MM-DD", matching the boiler's own daily CSV
+// grouping) — the rewrite's equivalent of the legacy app's oko_resume_day rollup table.
+// Fields are nullable individually because a day can have some metrics without others
+// (e.g. DJU configured but consumption sensors not yet mapped).
+model DailySynthesis {
+  day       String   @id
+  tcExtMax  Float?
+  tcExtMin  Float?
+  consoKg   Float?
+  dju       Float?
+  nbCycle   Int?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model BoilerConfigSnapshot {

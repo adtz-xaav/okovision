@@ -65,6 +65,57 @@ export type LiveReading = {
   value: number | null;
 };
 
+export type Season = { id: string; label: string; startDate: string; endDate: string };
+export type SeasonInput = { label: string; startDate: string; endDate: string };
+
+export type SiloEvent = { id: string; occurredAt: string; quantityKg: number; note: string | null };
+export type SiloEventInput = { occurredAt: string; quantityKg: number; note?: string };
+
+export type GraphSensorEntry = {
+  id: string;
+  sensorId: string;
+  coefficient: number;
+  position: number;
+  sensor: Sensor;
+};
+
+export type Graph = { id: string; name: string; position: number; sensors: GraphSensorEntry[] };
+export type GraphInput = { name: string; position: number; sensors: { sensorId: string; coefficient: number; position: number }[] };
+
+export type GraphSeries = { sensorId: string; label: string; unit: string | null; points: { timestamp: string; value: number }[] };
+export type GraphData = { id: string; name: string; series: GraphSeries[] };
+
+export type SynthesisConfig = {
+  outdoorTempSensorId: string | null;
+  augerRunSensorId: string | null;
+  augerPauseSensorId: string | null;
+  burnerCycleSensorId: string | null;
+  pelletWeightPerMinuteGrams: number;
+  referenceTempC: number;
+  houseSurfaceM2: number;
+};
+
+export type DailySynthesis = {
+  day: string;
+  tcExtMax: number | null;
+  tcExtMin: number | null;
+  consoKg: number | null;
+  dju: number | null;
+  nbCycle: number | null;
+};
+
+export type MonthlySynthesis = {
+  month: string;
+  tcExtMax: number | null;
+  tcExtMin: number | null;
+  consoKg: number | null;
+  dju: number | null;
+  nbCycle: number | null;
+  efficiencyGPerDjuM2: number | null;
+};
+
+export type SeasonSynthesis = { season: Season; months: MonthlySynthesis[]; houseSurfaceM2: number };
+
 export class ApiError extends Error {
   status: number;
 
@@ -131,4 +182,33 @@ export const api = {
   getLiveValues: () => request<LiveReading[]>("/live-tags/values"),
   setLiveValue: (id: string, value: number) =>
     request<void>(`/live-tags/${id}/set`, { method: "POST", body: JSON.stringify({ value }) }),
+
+  listSeasons: () => request<Season[]>("/seasons"),
+  createSeason: (input: SeasonInput) => request<Season>("/seasons", { method: "POST", body: JSON.stringify(input) }),
+  updateSeason: (id: string, input: SeasonInput) =>
+    request<Season>(`/seasons/${id}`, { method: "PUT", body: JSON.stringify(input) }),
+  deleteSeason: (id: string) => request<void>(`/seasons/${id}`, { method: "DELETE" }),
+
+  listSiloEvents: () => request<SiloEvent[]>("/silo-events"),
+  createSiloEvent: (input: SiloEventInput) => request<SiloEvent>("/silo-events", { method: "POST", body: JSON.stringify(input) }),
+  updateSiloEvent: (id: string, input: SiloEventInput) =>
+    request<SiloEvent>(`/silo-events/${id}`, { method: "PUT", body: JSON.stringify(input) }),
+  deleteSiloEvent: (id: string) => request<void>(`/silo-events/${id}`, { method: "DELETE" }),
+
+  listGraphs: () => request<Graph[]>("/graphs"),
+  createGraph: (input: GraphInput) => request<Graph>("/graphs", { method: "POST", body: JSON.stringify(input) }),
+  updateGraph: (id: string, input: GraphInput) => request<Graph>(`/graphs/${id}`, { method: "PUT", body: JSON.stringify(input) }),
+  deleteGraph: (id: string) => request<void>(`/graphs/${id}`, { method: "DELETE" }),
+  getGraphData: (id: string, from: string, to: string) =>
+    request<GraphData>(`/graphs/${id}/data?${new URLSearchParams({ from, to }).toString()}`),
+
+  getSynthesisConfig: () => request<SynthesisConfig>("/synthesis-config"),
+  setSynthesisConfig: (input: SynthesisConfig) =>
+    request<SynthesisConfig>("/synthesis-config", { method: "PUT", body: JSON.stringify(input) }),
+
+  getSynthesisRange: (from: string, to: string) =>
+    request<DailySynthesis[]>(`/synthesis?${new URLSearchParams({ from, to }).toString()}`),
+  getSeasonSynthesis: (seasonId: string) => request<SeasonSynthesis>(`/synthesis/seasons/${seasonId}`),
+  runSynthesis: (from: string, to: string) =>
+    request<{ daysProcessed: number }>("/synthesis/run", { method: "POST", body: JSON.stringify({ from, to }) }),
 };
