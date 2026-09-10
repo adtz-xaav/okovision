@@ -116,7 +116,8 @@ export function GraphsPage({ t, isAdmin }: { t: Dictionary; isAdmin: boolean }) 
     };
     try {
       if (editingId === "new") {
-        await api.createGraph(input);
+        const created = await api.createGraph(input);
+        setSelectedId(created.id);
       } else if (editingId) {
         await api.updateGraph(editingId, input);
       }
