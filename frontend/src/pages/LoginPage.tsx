@@ -24,15 +24,22 @@ export function LoginPage({ t, onAuthenticated }: { t: Dictionary; onAuthenticat
   }
 
   return (
-    <main className="login-page">
-      <form className="login-form" onSubmit={handleSubmit}>
-        <h1>{t.login.title}</h1>
-        <label>
-          {t.login.email}
+    <div className="ls-signin">
+      <form className="ls-signin-card" onSubmit={handleSubmit}>
+        <div className="ls-wordmark" style={{ marginBottom: 64 }}>
+          <span className="ls-live-dot" />
+          <span className="ls-wordmark-text">{t.appName}</span>
+        </div>
+
+        <h1 className="ls-signin-heading">{mode === "login" ? t.login.title : t.login.submitRegister}</h1>
+
+        <label className="ls-field">
+          <span className="ls-field-label">{t.login.email}</span>
           <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" />
         </label>
-        <label>
-          {t.login.password}
+
+        <label className="ls-field">
+          <span className="ls-field-label">{t.login.password}</span>
           <input
             type="password"
             required
@@ -41,18 +48,21 @@ export function LoginPage({ t, onAuthenticated }: { t: Dictionary; onAuthenticat
             autoComplete={mode === "login" ? "current-password" : "new-password"}
           />
         </label>
+
         {error && (
-          <p className="login-error" role="alert">
+          <p className="ls-error" role="alert">
             {error}
           </p>
         )}
-        <button type="submit" disabled={submitting}>
+
+        <button type="submit" className="ls-button" disabled={submitting}>
           {mode === "login" ? t.login.submit : t.login.submitRegister}
         </button>
-        <button type="button" className="login-switch" onClick={() => setMode(mode === "login" ? "register" : "login")}>
+
+        <button type="button" className="ls-signin-switch" onClick={() => setMode(mode === "login" ? "register" : "login")}>
           {mode === "login" ? t.login.registerInstead : t.login.backToLogin}
         </button>
       </form>
-    </main>
+    </div>
   );
 }
