@@ -69,7 +69,11 @@ export interface Dictionary {
     last24h: string;
     last7d: string;
     last30d: string;
-    rangeCaption: string;
+    compareLabel: string;
+    savedViewsLabel: string;
+    saveView: string;
+    saveViewPrompt: string;
+    saveViewError: string;
   };
   live: {
     label: string;
@@ -239,12 +243,16 @@ export const en: Dictionary = {
     to: "To",
     timestamp: "Time",
     value: "Value",
-    noReadings: "No readings for this sensor in the selected range.",
+    noReadings: "No readings in the selected range.",
     selectSensorPrompt: "Choose a sensor to see its readings.",
     last24h: "24 hours",
     last7d: "7 days",
     last30d: "30 days",
-    rangeCaption: "Between {min} and {max} over the last {range}.",
+    compareLabel: "Compare readings",
+    savedViewsLabel: "Saved views",
+    saveView: "Save as view",
+    saveViewPrompt: "Name this view",
+    saveViewError: "Could not save this view.",
   },
   live: {
     label: "Value",

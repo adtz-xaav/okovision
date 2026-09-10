@@ -87,7 +87,7 @@ function App() {
         <h1 className="ls-page-title">{pageTitle}</h1>
         {tab === "now" && <NowPage t={t} isAdmin={isAdmin} />}
         {tab === "trends" && <TrendsPage t={t} />}
-        {tab === "history" && <HistoryPage t={t} />}
+        {tab === "history" && <HistoryPage t={t} isAdmin={isAdmin} />}
         {tab === "settings" && (
           <SettingsPage t={t} language={language} setLanguage={setLanguage} isAdmin={isAdmin} user={user} onLogout={handleLogout} />
         )}

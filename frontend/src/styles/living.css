@@ -376,6 +376,28 @@
   border-color: var(--ls-mist);
 }
 
+.ls-legend-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.ls-text-action {
+  background: none;
+  border: none;
+  color: rgba(237, 238, 233, 0.55);
+  font-family: inherit;
+  font-size: 13px;
+  padding: 0;
+  margin: -8px 0 20px;
+  cursor: pointer;
+}
+.ls-text-action:hover,
+.ls-text-action:focus-visible {
+  color: var(--ls-mist);
+}
+
 /* ---------- bottom nav ---------- */
 
 .ls-bottomnav {
