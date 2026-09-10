@@ -82,6 +82,17 @@ describe("isDateFullyIngested", () => {
     });
     expect(await isDateFullyIngested("2026-09-09")).toBe(true);
   });
+
+  // Real hardware doesn't land its last log line exactly on the minute: Xavier's boiler
+  // logs its last row of the day at 23:59:47. An exact-instant check missed this entirely
+  // and silently left every real day "not fully ingested" forever.
+  it("is true for a reading anywhere in the 23:59 minute, not just exactly :00", async () => {
+    const sensor = await prisma.sensor.create({ data: { key: "outdoor_temp", label: "Outdoor", csvColumn: 0 } });
+    await prisma.sensorReading.create({
+      data: { sensorId: sensor.id, timestamp: new Date("2026-09-09T23:59:47.000Z"), value: 10 },
+    });
+    expect(await isDateFullyIngested("2026-09-09")).toBe(true);
+  });
 });
 
 describe("runBoilerIngest", () => {

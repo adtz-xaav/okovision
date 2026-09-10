@@ -5,10 +5,12 @@ import { format, useLocale } from "./hooks/useLocale";
 import { LoginPage } from "./pages/LoginPage";
 import { HistoryPage } from "./pages/HistoryPage";
 import { LivePage } from "./pages/LivePage";
+import { GraphsPage } from "./pages/GraphsPage";
+import { SynthesisPage } from "./pages/SynthesisPage";
 import { SensorsPage } from "./pages/SensorsPage";
 
 type AuthState = "checking" | "anonymous" | "authenticated";
-type Tab = "history" | "live" | "sensors";
+type Tab = "history" | "live" | "graphs" | "synthesis" | "sensors";
 
 function App() {
   const { language, setLanguage, t } = useLocale();
@@ -68,6 +70,12 @@ function App() {
               <button className={tab === "live" ? "active" : ""} onClick={() => setTab("live")}>
                 {t.nav.live}
               </button>
+              <button className={tab === "graphs" ? "active" : ""} onClick={() => setTab("graphs")}>
+                {t.nav.graphs}
+              </button>
+              <button className={tab === "synthesis" ? "active" : ""} onClick={() => setTab("synthesis")}>
+                {t.nav.synthesis}
+              </button>
               {user.role === "ADMIN" && (
                 <button className={tab === "sensors" ? "active" : ""} onClick={() => setTab("sensors")}>
                   {t.nav.sensors}
@@ -80,6 +88,8 @@ function App() {
           <main className="dashboard">
             {tab === "history" && <HistoryPage t={t} />}
             {tab === "live" && <LivePage t={t} isAdmin={user.role === "ADMIN"} />}
+            {tab === "graphs" && <GraphsPage t={t} isAdmin={user.role === "ADMIN"} />}
+            {tab === "synthesis" && <SynthesisPage t={t} isAdmin={user.role === "ADMIN"} />}
             {tab === "sensors" && user.role === "ADMIN" && <SensorsPage t={t} />}
           </main>
         </>

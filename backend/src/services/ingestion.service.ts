@@ -38,10 +38,19 @@ export async function ingestDay(client: BoilerClient, date: string): Promise<Ing
 }
 
 // Mirrors the legacy app's own day-completeness check: a day is "done" once we hold a
-// reading at 23:59 — the boiler only writes that row once the day has fully logged.
+// reading in its last logged minute (23:59) — the boiler only writes one that late once the
+// day has fully logged. The exact second varies with the boiler's own polling offset (real
+// hardware logs its last row of the day at 23:59:47, not exactly :00), so this checks the
+// whole 23:59 minute rather than one exact instant.
 export async function isDateFullyIngested(date: string): Promise<boolean> {
-  const endOfDay = new Date(`${date}T23:59:00.000Z`);
-  const count = await prisma.sensorReading.count({ where: { timestamp: endOfDay } });
+  const count = await prisma.sensorReading.count({
+    where: {
+      timestamp: {
+        gte: new Date(`${date}T23:59:00.000Z`),
+        lte: new Date(`${date}T23:59:59.999Z`),
+      },
+    },
+  });
   return count > 0;
 }
 

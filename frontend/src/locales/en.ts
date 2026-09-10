@@ -18,6 +18,8 @@ export interface Dictionary {
   nav: {
     history: string;
     live: string;
+    graphs: string;
+    synthesis: string;
     sensors: string;
   };
   history: {
@@ -74,6 +76,55 @@ export interface Dictionary {
     liveTagAdd: string;
     liveTagHint: string;
   };
+  graphs: {
+    title: string;
+    select: string;
+    noGraphs: string;
+    manageTitle: string;
+    sensorCount: string;
+    add: string;
+    name: string;
+    sensorsInGraph: string;
+    coefficient: string;
+    addSensor: string;
+  };
+  synthesis: {
+    title: string;
+    mode: string;
+    modeSeason: string;
+    modeRange: string;
+    season: string;
+    noSeasons: string;
+    noData: string;
+    month: string;
+    day: string;
+    tcExtMax: string;
+    tcExtMin: string;
+    conso: string;
+    dju: string;
+    nbCycle: string;
+    efficiency: string;
+    runTitle: string;
+    runNow: string;
+    runResult: string;
+    configTitle: string;
+    configSaved: string;
+    configHint: string;
+    roleNone: string;
+    outdoorTempSensor: string;
+    augerRunSensor: string;
+    augerPauseSensor: string;
+    burnerCycleSensor: string;
+    pelletWeightPerMinute: string;
+    referenceTemp: string;
+    houseSurface: string;
+    seasonsTitle: string;
+    seasonAdd: string;
+    siloEventsTitle: string;
+    siloEventAdd: string;
+    quantityKg: string;
+    note: string;
+  };
 }
 
 export const en: Dictionary = {
@@ -96,6 +147,8 @@ export const en: Dictionary = {
   nav: {
     history: "History",
     live: "Live",
+    graphs: "Graphs",
+    synthesis: "Reports",
     sensors: "Sensors",
   },
   history: {
@@ -151,5 +204,54 @@ export const en: Dictionary = {
     liveTagDivisor: "Divisor",
     liveTagAdd: "Add live value",
     liveTagHint: "The real tag path on the boiler, e.g. CAPPL:LOCAL.oekomode. The boiler sends raw scaled integers (e.g. 94 for 9.4°C) — divisor converts to and from the real value.",
+  },
+  graphs: {
+    title: "Graphs",
+    select: "Graph",
+    noGraphs: "No graphs configured yet. Ask an admin to create one below.",
+    manageTitle: "Manage graphs",
+    sensorCount: "Sensors",
+    add: "Add graph",
+    name: "Name",
+    sensorsInGraph: "Sensors in this graph",
+    coefficient: "Coefficient",
+    addSensor: "Add sensor",
+  },
+  synthesis: {
+    title: "Synthesis",
+    mode: "View",
+    modeSeason: "By season",
+    modeRange: "Custom range",
+    season: "Season",
+    noSeasons: "No seasons configured yet. Ask an admin to create one below.",
+    noData: "No synthesis data for this range yet — run it below, or wait for the next scheduled ingest.",
+    month: "Month",
+    day: "Day",
+    tcExtMax: "Outdoor max (°C)",
+    tcExtMin: "Outdoor min (°C)",
+    conso: "Pellets (kg)",
+    dju: "Degree-days",
+    nbCycle: "Burner cycles",
+    efficiency: "g/DJU/m²",
+    runTitle: "Run synthesis now",
+    runNow: "Run",
+    runResult: "{days} day(s) computed.",
+    configTitle: "Synthesis settings",
+    configSaved: "Saved.",
+    configHint: "Pick which mapped sensor plays each role. Leave a role blank to skip that metric until it's mapped.",
+    roleNone: "— none —",
+    outdoorTempSensor: "Outdoor temperature sensor",
+    augerRunSensor: "Auger run-time sensor",
+    augerPauseSensor: "Auger pause-time sensor",
+    burnerCycleSensor: "Burner cycle-count sensor",
+    pelletWeightPerMinute: "Pellet weight per minute of auger run (g)",
+    referenceTemp: "Degree-day reference temperature (°C)",
+    houseSurface: "Heated floor area (m²)",
+    seasonsTitle: "Seasons",
+    seasonAdd: "Add season",
+    siloEventsTitle: "Silo deliveries",
+    siloEventAdd: "Add delivery",
+    quantityKg: "Quantity (kg)",
+    note: "Note",
   },
 };

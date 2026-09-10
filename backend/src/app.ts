@@ -5,10 +5,15 @@ import helmet from "helmet";
 import { env } from "./lib/env.js";
 import { authRouter } from "./routes/auth.routes.js";
 import { boilerConnectionRouter } from "./routes/boilerConnection.routes.js";
+import { graphRouter } from "./routes/graph.routes.js";
 import { liveTagRouter } from "./routes/liveTag.routes.js";
 import { readingRouter } from "./routes/reading.routes.js";
 import { schedulerRouter } from "./routes/scheduler.routes.js";
+import { seasonRouter } from "./routes/season.routes.js";
 import { sensorRouter } from "./routes/sensor.routes.js";
+import { siloEventRouter } from "./routes/siloEvent.routes.js";
+import { synthesisRouter } from "./routes/synthesis.routes.js";
+import { synthesisConfigRouter } from "./routes/synthesisConfig.routes.js";
 
 export function createApp() {
   const app = express();
@@ -37,6 +42,11 @@ export function createApp() {
   app.use("/api/live-tags", liveTagRouter);
   app.use("/api/readings", readingRouter);
   app.use("/api/scheduler", schedulerRouter);
+  app.use("/api/graphs", graphRouter);
+  app.use("/api/seasons", seasonRouter);
+  app.use("/api/silo-events", siloEventRouter);
+  app.use("/api/synthesis-config", synthesisConfigRouter);
+  app.use("/api/synthesis", synthesisRouter);
 
   return app;
 }
