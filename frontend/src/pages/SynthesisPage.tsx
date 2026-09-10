@@ -212,20 +212,20 @@ export function SynthesisPage({ t, isAdmin }: { t: Dictionary; isAdmin: boolean 
   }
 
   return (
-    <section className="page-section">
-      <div className="panel">
-        <h2>{t.synthesis.title}</h2>
-        <div className="filter-bar">
-          <label>
-            {t.synthesis.mode}
+    <div className="ls-page-wide" style={{ width: "100%" }}>
+      <div className="ls-panel">
+        <h2 className="ls-panel-title">{t.synthesis.title}</h2>
+        <div className="ls-form-grid">
+          <label className="ls-field">
+            <span className="ls-field-label">{t.synthesis.mode}</span>
             <select value={mode} onChange={(e) => setMode(e.target.value as "season" | "range")}>
               <option value="season">{t.synthesis.modeSeason}</option>
               <option value="range">{t.synthesis.modeRange}</option>
             </select>
           </label>
           {mode === "season" ? (
-            <label>
-              {t.synthesis.season}
+            <label className="ls-field">
+              <span className="ls-field-label">{t.synthesis.season}</span>
               <select value={selectedSeasonId} onChange={(e) => setSelectedSeasonId(e.target.value)}>
                 {seasons.map((season) => (
                   <option key={season.id} value={season.id}>
@@ -236,23 +236,23 @@ export function SynthesisPage({ t, isAdmin }: { t: Dictionary; isAdmin: boolean 
             </label>
           ) : (
             <>
-              <label>
-                {t.history.from}
+              <label className="ls-field">
+                <span className="ls-field-label">{t.history.from}</span>
                 <input type="date" value={range.from} onChange={(e) => setRange({ ...range, from: e.target.value })} />
               </label>
-              <label>
-                {t.history.to}
+              <label className="ls-field">
+                <span className="ls-field-label">{t.history.to}</span>
                 <input type="date" value={range.to} onChange={(e) => setRange({ ...range, to: e.target.value })} />
               </label>
             </>
           )}
         </div>
 
-        {mode === "season" && seasons.length === 0 && <p>{t.synthesis.noSeasons}</p>}
+        {mode === "season" && seasons.length === 0 && <p className="ls-empty">{t.synthesis.noSeasons}</p>}
 
         {mode === "season" && seasonData && (
-          <div className="table-scroll">
-            <table>
+          <div className="ls-table-wrap">
+            <table className="ls-table">
               <thead>
                 <tr>
                   <th>{t.synthesis.month}</th>
@@ -281,11 +281,11 @@ export function SynthesisPage({ t, isAdmin }: { t: Dictionary; isAdmin: boolean 
           </div>
         )}
 
-        {mode === "range" && rangeData && rangeData.length === 0 && <p>{t.synthesis.noData}</p>}
+        {mode === "range" && rangeData && rangeData.length === 0 && <p className="ls-empty">{t.synthesis.noData}</p>}
 
         {mode === "range" && rangeData && rangeData.length > 0 && (
-          <div className="table-scroll">
-            <table>
+          <div className="ls-table-wrap">
+            <table className="ls-table">
               <thead>
                 <tr>
                   <th>{t.synthesis.day}</th>
@@ -315,85 +315,89 @@ export function SynthesisPage({ t, isAdmin }: { t: Dictionary; isAdmin: boolean 
 
       {isAdmin && (
         <>
-          <div className="panel">
-            <h2>{t.synthesis.runTitle}</h2>
-            <div className="filter-bar">
-              <label>
-                {t.history.from}
+          <div className="ls-panel">
+            <h2 className="ls-panel-title">{t.synthesis.runTitle}</h2>
+            <div className="ls-form-grid" style={{ alignItems: "flex-end" }}>
+              <label className="ls-field">
+                <span className="ls-field-label">{t.history.from}</span>
                 <input type="date" value={runRange.from} onChange={(e) => setRunRange({ ...runRange, from: e.target.value })} />
               </label>
-              <label>
-                {t.history.to}
+              <label className="ls-field">
+                <span className="ls-field-label">{t.history.to}</span>
                 <input type="date" value={runRange.to} onChange={(e) => setRunRange({ ...runRange, to: e.target.value })} />
               </label>
-              <button type="button" onClick={runNow}>
+              <button type="button" className="ls-btn ls-btn-primary" onClick={runNow}>
                 {t.synthesis.runNow}
               </button>
             </div>
-            {runMessage && <p className="field-hint">{runMessage}</p>}
+            {runMessage && <p className="ls-hint">{runMessage}</p>}
             {runError && (
-              <p className="login-error" role="alert">
+              <p className="ls-error" role="alert">
                 {runError}
               </p>
             )}
           </div>
 
-          <div className="panel">
-            <h2>{t.synthesis.configTitle}</h2>
-            <form className="sensor-form" onSubmit={saveConfig}>
-              <label>
-                {t.synthesis.outdoorTempSensor}
-                <SensorRoleSelect value={config.outdoorTempSensorId} onChange={(v) => setConfig({ ...config, outdoorTempSensorId: v })} sensors={sensors} t={t} />
-              </label>
-              <label>
-                {t.synthesis.augerRunSensor}
-                <SensorRoleSelect value={config.augerRunSensorId} onChange={(v) => setConfig({ ...config, augerRunSensorId: v })} sensors={sensors} t={t} />
-              </label>
-              <label>
-                {t.synthesis.augerPauseSensor}
-                <SensorRoleSelect value={config.augerPauseSensorId} onChange={(v) => setConfig({ ...config, augerPauseSensorId: v })} sensors={sensors} t={t} />
-              </label>
-              <label>
-                {t.synthesis.burnerCycleSensor}
-                <SensorRoleSelect value={config.burnerCycleSensorId} onChange={(v) => setConfig({ ...config, burnerCycleSensorId: v })} sensors={sensors} t={t} />
-              </label>
-              <label>
-                {t.synthesis.pelletWeightPerMinute}
-                <input
-                  type="number"
-                  step="any"
-                  value={config.pelletWeightPerMinuteGrams}
-                  onChange={(e) => setConfig({ ...config, pelletWeightPerMinuteGrams: Number(e.target.value) || 0 })}
-                />
-              </label>
-              <label>
-                {t.synthesis.referenceTemp}
-                <input
-                  type="number"
-                  step="any"
-                  value={config.referenceTempC}
-                  onChange={(e) => setConfig({ ...config, referenceTempC: Number(e.target.value) || 0 })}
-                />
-              </label>
-              <label>
-                {t.synthesis.houseSurface}
-                <input
-                  type="number"
-                  step="any"
-                  value={config.houseSurfaceM2}
-                  onChange={(e) => setConfig({ ...config, houseSurfaceM2: Number(e.target.value) || 0 })}
-                />
-              </label>
-              <p className="field-hint">{t.synthesis.configHint}</p>
-              <button type="submit">{t.sensors.save}</button>
-              {configMessage && <p className="field-hint">{configMessage}</p>}
+          <div className="ls-panel">
+            <h2 className="ls-panel-title">{t.synthesis.configTitle}</h2>
+            <form onSubmit={saveConfig}>
+              <div className="ls-form-grid">
+                <label className="ls-field">
+                  <span className="ls-field-label">{t.synthesis.outdoorTempSensor}</span>
+                  <SensorRoleSelect value={config.outdoorTempSensorId} onChange={(v) => setConfig({ ...config, outdoorTempSensorId: v })} sensors={sensors} t={t} />
+                </label>
+                <label className="ls-field">
+                  <span className="ls-field-label">{t.synthesis.augerRunSensor}</span>
+                  <SensorRoleSelect value={config.augerRunSensorId} onChange={(v) => setConfig({ ...config, augerRunSensorId: v })} sensors={sensors} t={t} />
+                </label>
+                <label className="ls-field">
+                  <span className="ls-field-label">{t.synthesis.augerPauseSensor}</span>
+                  <SensorRoleSelect value={config.augerPauseSensorId} onChange={(v) => setConfig({ ...config, augerPauseSensorId: v })} sensors={sensors} t={t} />
+                </label>
+                <label className="ls-field">
+                  <span className="ls-field-label">{t.synthesis.burnerCycleSensor}</span>
+                  <SensorRoleSelect value={config.burnerCycleSensorId} onChange={(v) => setConfig({ ...config, burnerCycleSensorId: v })} sensors={sensors} t={t} />
+                </label>
+                <label className="ls-field">
+                  <span className="ls-field-label">{t.synthesis.pelletWeightPerMinute}</span>
+                  <input
+                    type="number"
+                    step="any"
+                    value={config.pelletWeightPerMinuteGrams}
+                    onChange={(e) => setConfig({ ...config, pelletWeightPerMinuteGrams: Number(e.target.value) || 0 })}
+                  />
+                </label>
+                <label className="ls-field">
+                  <span className="ls-field-label">{t.synthesis.referenceTemp}</span>
+                  <input
+                    type="number"
+                    step="any"
+                    value={config.referenceTempC}
+                    onChange={(e) => setConfig({ ...config, referenceTempC: Number(e.target.value) || 0 })}
+                  />
+                </label>
+                <label className="ls-field">
+                  <span className="ls-field-label">{t.synthesis.houseSurface}</span>
+                  <input
+                    type="number"
+                    step="any"
+                    value={config.houseSurfaceM2}
+                    onChange={(e) => setConfig({ ...config, houseSurfaceM2: Number(e.target.value) || 0 })}
+                  />
+                </label>
+              </div>
+              <p className="ls-hint">{t.synthesis.configHint}</p>
+              <button type="submit" className="ls-btn ls-btn-primary">
+                {t.sensors.save}
+              </button>
+              {configMessage && <p className="ls-hint">{configMessage}</p>}
             </form>
           </div>
 
-          <div className="panel">
-            <h2>{t.synthesis.seasonsTitle}</h2>
-            <div className="table-scroll">
-              <table>
+          <div className="ls-panel">
+            <h2 className="ls-panel-title">{t.synthesis.seasonsTitle}</h2>
+            <div className="ls-table-wrap">
+              <table className="ls-table">
                 <thead>
                   <tr>
                     <th>{t.sensors.label}</th>
@@ -408,13 +412,15 @@ export function SynthesisPage({ t, isAdmin }: { t: Dictionary; isAdmin: boolean 
                       <td>{season.label}</td>
                       <td>{season.startDate.slice(0, 10)}</td>
                       <td>{season.endDate.slice(0, 10)}</td>
-                      <td className="row-actions">
-                        <button type="button" onClick={() => startEditSeason(season)}>
-                          {t.sensors.edit}
-                        </button>
-                        <button type="button" onClick={() => removeSeason(season.id)}>
-                          {t.sensors.delete}
-                        </button>
+                      <td>
+                        <span className="ls-btn-row">
+                          <button type="button" className="ls-text-action" onClick={() => startEditSeason(season)}>
+                            {t.sensors.edit}
+                          </button>
+                          <button type="button" className="ls-text-action ls-text-action--danger" onClick={() => removeSeason(season.id)}>
+                            {t.sensors.delete}
+                          </button>
+                        </span>
                       </td>
                     </tr>
                   ))}
@@ -423,31 +429,35 @@ export function SynthesisPage({ t, isAdmin }: { t: Dictionary; isAdmin: boolean 
             </div>
 
             {seasonEditingId === null ? (
-              <button type="button" onClick={startAddSeason}>
+              <button type="button" className="ls-btn ls-btn-primary" onClick={startAddSeason}>
                 {t.synthesis.seasonAdd}
               </button>
             ) : (
-              <form className="sensor-form" onSubmit={submitSeasonForm}>
-                <label>
-                  {t.sensors.label}
-                  <input value={seasonForm.label} onChange={(e) => setSeasonForm({ ...seasonForm, label: e.target.value })} required />
-                </label>
-                <label>
-                  {t.history.from}
-                  <input type="date" value={seasonForm.startDate} onChange={(e) => setSeasonForm({ ...seasonForm, startDate: e.target.value })} required />
-                </label>
-                <label>
-                  {t.history.to}
-                  <input type="date" value={seasonForm.endDate} onChange={(e) => setSeasonForm({ ...seasonForm, endDate: e.target.value })} required />
-                </label>
+              <form onSubmit={submitSeasonForm}>
+                <div className="ls-form-grid">
+                  <label className="ls-field">
+                    <span className="ls-field-label">{t.sensors.label}</span>
+                    <input value={seasonForm.label} onChange={(e) => setSeasonForm({ ...seasonForm, label: e.target.value })} required />
+                  </label>
+                  <label className="ls-field">
+                    <span className="ls-field-label">{t.history.from}</span>
+                    <input type="date" value={seasonForm.startDate} onChange={(e) => setSeasonForm({ ...seasonForm, startDate: e.target.value })} required />
+                  </label>
+                  <label className="ls-field">
+                    <span className="ls-field-label">{t.history.to}</span>
+                    <input type="date" value={seasonForm.endDate} onChange={(e) => setSeasonForm({ ...seasonForm, endDate: e.target.value })} required />
+                  </label>
+                </div>
                 {seasonFormError && (
-                  <p className="login-error" role="alert">
+                  <p className="ls-error" role="alert">
                     {seasonFormError}
                   </p>
                 )}
-                <div className="row-actions">
-                  <button type="submit">{t.sensors.save}</button>
-                  <button type="button" onClick={() => setSeasonEditingId(null)}>
+                <div className="ls-btn-row">
+                  <button type="submit" className="ls-btn ls-btn-primary">
+                    {t.sensors.save}
+                  </button>
+                  <button type="button" className="ls-text-action" onClick={() => setSeasonEditingId(null)}>
                     {t.sensors.cancel}
                   </button>
                 </div>
@@ -455,10 +465,10 @@ export function SynthesisPage({ t, isAdmin }: { t: Dictionary; isAdmin: boolean 
             )}
           </div>
 
-          <div className="panel">
-            <h2>{t.synthesis.siloEventsTitle}</h2>
-            <div className="table-scroll">
-              <table>
+          <div className="ls-panel">
+            <h2 className="ls-panel-title">{t.synthesis.siloEventsTitle}</h2>
+            <div className="ls-table-wrap">
+              <table className="ls-table">
                 <thead>
                   <tr>
                     <th>{t.history.timestamp}</th>
@@ -473,13 +483,15 @@ export function SynthesisPage({ t, isAdmin }: { t: Dictionary; isAdmin: boolean 
                       <td>{event.occurredAt.slice(0, 10)}</td>
                       <td>{event.quantityKg}</td>
                       <td>{event.note ?? "—"}</td>
-                      <td className="row-actions">
-                        <button type="button" onClick={() => startEditSiloEvent(event)}>
-                          {t.sensors.edit}
-                        </button>
-                        <button type="button" onClick={() => removeSiloEvent(event.id)}>
-                          {t.sensors.delete}
-                        </button>
+                      <td>
+                        <span className="ls-btn-row">
+                          <button type="button" className="ls-text-action" onClick={() => startEditSiloEvent(event)}>
+                            {t.sensors.edit}
+                          </button>
+                          <button type="button" className="ls-text-action ls-text-action--danger" onClick={() => removeSiloEvent(event.id)}>
+                            {t.sensors.delete}
+                          </button>
+                        </span>
                       </td>
                     </tr>
                   ))}
@@ -488,31 +500,35 @@ export function SynthesisPage({ t, isAdmin }: { t: Dictionary; isAdmin: boolean 
             </div>
 
             {siloEditingId === null ? (
-              <button type="button" onClick={startAddSiloEvent}>
+              <button type="button" className="ls-btn ls-btn-primary" onClick={startAddSiloEvent}>
                 {t.synthesis.siloEventAdd}
               </button>
             ) : (
-              <form className="sensor-form" onSubmit={submitSiloForm}>
-                <label>
-                  {t.history.timestamp}
-                  <input type="date" value={siloForm.occurredAt} onChange={(e) => setSiloForm({ ...siloForm, occurredAt: e.target.value })} required />
-                </label>
-                <label>
-                  {t.synthesis.quantityKg}
-                  <input type="number" step="any" value={siloForm.quantityKg} onChange={(e) => setSiloForm({ ...siloForm, quantityKg: e.target.value })} required />
-                </label>
-                <label>
-                  {t.synthesis.note}
-                  <input value={siloForm.note} onChange={(e) => setSiloForm({ ...siloForm, note: e.target.value })} />
-                </label>
+              <form onSubmit={submitSiloForm}>
+                <div className="ls-form-grid">
+                  <label className="ls-field">
+                    <span className="ls-field-label">{t.history.timestamp}</span>
+                    <input type="date" value={siloForm.occurredAt} onChange={(e) => setSiloForm({ ...siloForm, occurredAt: e.target.value })} required />
+                  </label>
+                  <label className="ls-field">
+                    <span className="ls-field-label">{t.synthesis.quantityKg}</span>
+                    <input type="number" step="any" value={siloForm.quantityKg} onChange={(e) => setSiloForm({ ...siloForm, quantityKg: e.target.value })} required />
+                  </label>
+                  <label className="ls-field">
+                    <span className="ls-field-label">{t.synthesis.note}</span>
+                    <input value={siloForm.note} onChange={(e) => setSiloForm({ ...siloForm, note: e.target.value })} />
+                  </label>
+                </div>
                 {siloFormError && (
-                  <p className="login-error" role="alert">
+                  <p className="ls-error" role="alert">
                     {siloFormError}
                   </p>
                 )}
-                <div className="row-actions">
-                  <button type="submit">{t.sensors.save}</button>
-                  <button type="button" onClick={() => setSiloEditingId(null)}>
+                <div className="ls-btn-row">
+                  <button type="submit" className="ls-btn ls-btn-primary">
+                    {t.sensors.save}
+                  </button>
+                  <button type="button" className="ls-text-action" onClick={() => setSiloEditingId(null)}>
                     {t.sensors.cancel}
                   </button>
                 </div>
@@ -521,6 +537,6 @@ export function SynthesisPage({ t, isAdmin }: { t: Dictionary; isAdmin: boolean 
           </div>
         </>
       )}
-    </section>
+    </div>
   );
 }

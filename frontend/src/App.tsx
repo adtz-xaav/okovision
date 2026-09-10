@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import "./App.css";
 import "./styles/living.css";
 import { api, type SessionUser } from "./lib/api";
 import { useLocale } from "./hooks/useLocale";

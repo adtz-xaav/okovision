@@ -51,15 +51,13 @@ export function SettingsPage({
   if (section !== "hub") {
     return (
       <div>
-        <button type="button" className="ls-legacy-back" onClick={() => setSection("hub")}>
+        <button type="button" className="ls-subpage-back" onClick={() => setSection("hub")}>
           <BackChevron />
           {t.settingsHub.back}
         </button>
-        <div className="ls-legacy-frame">
-          {section === "graphs" && <GraphsPage t={t} isAdmin={isAdmin} />}
-          {section === "sensors" && isAdmin && <SensorsPage t={t} language={language} />}
-          {section === "synthesis" && isAdmin && <SynthesisPage t={t} isAdmin={isAdmin} />}
-        </div>
+        {section === "graphs" && <GraphsPage t={t} isAdmin={isAdmin} />}
+        {section === "sensors" && isAdmin && <SensorsPage t={t} language={language} />}
+        {section === "synthesis" && isAdmin && <SynthesisPage t={t} isAdmin={isAdmin} />}
       </div>
     );
   }
