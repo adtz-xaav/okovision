@@ -19,6 +19,10 @@ function App() {
   const [tab, setTab] = useState<Tab>("history");
 
   useEffect(() => {
+    document.documentElement.lang = language;
+  }, [language]);
+
+  useEffect(() => {
     api
       .me()
       .then((me) => {
@@ -86,11 +90,11 @@ function App() {
             <button onClick={handleLogout}>{t.session.logout}</button>
           </div>
           <main className="dashboard">
-            {tab === "history" && <HistoryPage t={t} />}
+            {tab === "history" && <HistoryPage t={t} language={language} />}
             {tab === "live" && <LivePage t={t} isAdmin={user.role === "ADMIN"} />}
             {tab === "graphs" && <GraphsPage t={t} isAdmin={user.role === "ADMIN"} />}
             {tab === "synthesis" && <SynthesisPage t={t} isAdmin={user.role === "ADMIN"} />}
-            {tab === "sensors" && user.role === "ADMIN" && <SensorsPage t={t} />}
+            {tab === "sensors" && user.role === "ADMIN" && <SensorsPage t={t} language={language} />}
           </main>
         </>
       )}

@@ -26,3 +26,9 @@ export function useLocale() {
 export function format(template: string, values: Record<string, string>): string {
   return template.replace(/\{(\w+)\}/g, (_, key: string) => values[key] ?? `{${key}}`);
 }
+
+const localeTags: Record<Language, string> = { en: "en-US", fr: "fr-FR" };
+
+export function formatDateTime(iso: string, language: Language): string {
+  return new Date(iso).toLocaleString(localeTags[language]);
+}

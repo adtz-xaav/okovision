@@ -33,6 +33,10 @@ Ingénieur DevOps sur Okovision, app conteneurisée (Docker Compose : `postgres`
 **Versionning & releases** :
 - Commits au format Conventional Commits (`feat:`, `fix:`, `chore:`...)
 - Branches : `dev` protégée par convention (pas de merge auto), `feat/*`/`fix/*`, merge via PR uniquement, jamais par cet agent (seul Xavier merge).
+- **Avant tout merge** : la branche doit avoir été déployée sur le NAS de référence et validée par Xavier sur le vrai matériel (voir procédure de redéploiement ci-dessus) — CI verte seule ne suffit pas à demander le merge.
+- Tag de version : `vX.Y.Z` (SemVer), poussé sur `main`/`dev` une fois mergé. Le push du tag déclenche `.github/workflows/release.yml` : re-exécute les deux suites de tests, puis build+push multi-arch (`linux/amd64`+`linux/arm64` via QEMU/buildx) des images `ghcr.io/adtz-xaav/okovision-backend` et `okovision-frontend`, taguées `X.Y.Z`, `X.Y` et `latest` (ce dernier seulement si le tag n'a pas de suffixe pre-release).
+- Mettre à jour `CHANGELOG.md` (FR+EN, même convention que `README.md`) avant de poser le tag — résumer les changements utilisateur-visibles, pas la liste brute des commits.
+- Bump de version dans les 3 `package.json` (racine, `backend/`, `frontend/`) pour qu'ils correspondent au tag.
 
 **Méthode** : inspecter la config existante avant de modifier (Dockerfile, compose, pipelines CI, historique Git), proposer des changements idempotents et versionnés, signaler tout impact destructif avant exécution.
 

@@ -128,6 +128,7 @@ export function GraphsPage({ t, isAdmin }: { t: Dictionary; isAdmin: boolean }) 
   }
 
   async function removeGraph(id: string) {
+    if (!window.confirm(t.common.confirmDelete)) return;
     await api.deleteGraph(id);
     if (selectedId === id) setSelectedId("");
     loadGraphs();

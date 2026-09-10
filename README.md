@@ -2,9 +2,9 @@
 
 Self-hosted monitoring and control for the Okofen Pellematic Touch pellet boiler. Containerized, portable — run it against your own boiler on any Docker host.
 
-This is a full rewrite of the original [stawen/okovision](https://github.com/stawen/okovision) PHP application (kept for reference under [`legacy/`](legacy/)). See `CLAUDE.md` for architecture and contributor guidance.
+This is a full rewrite of the original [stawen/okovision](https://github.com/stawen/okovision) PHP application (kept for reference under [`legacy/`](legacy/)). See `CLAUDE.md` for architecture and contributor guidance, and `CHANGELOG.md` for release history.
 
-Status: rewrite in progress. `backend/` and `frontend/` are the new application; `legacy/` is not maintained.
+Status: stable, first tagged release (`v1.0.0`). `backend/` and `frontend/` are the current application; `legacy/` is not maintained.
 
 ## Structure
 
@@ -18,8 +18,12 @@ Run this on a Linux host on the same local network as your boiler (a NAS with Do
 
 1. Copy `.env.example` to `.env` and fill in the two generated secrets (commands are in the file's comments: `openssl rand -base64 48` for `JWT_SECRET`, `openssl rand -hex 32` for `BOILER_CREDENTIALS_KEY`). Set a real `POSTGRES_PASSWORD`. Adjust `BACKEND_PORT`/`FRONTEND_PORT` if the defaults (4000/8080) are already used on your host.
 2. `docker compose up -d --build` — builds and starts `postgres`, `backend`, `frontend`; database migrations run automatically on backend startup.
-3. Open `http://<host>:<FRONTEND_PORT>` and register — the first account created becomes the ADMIN/owner account.
+3. Open `http://<host>:<FRONTEND_PORT>` and register — the first account created becomes the ADMIN/owner account. Register right after first startup: anyone who reaches the app before you becomes the admin instead, so don't expose the port to the internet before this step (keep it on your LAN or behind a VPN).
 4. From the admin **Sensors** page, set your boiler's LAN IP and its own web-UI login (not your Okovision account) to enable history ingestion and live values/control.
+
+### Updating
+
+`git pull` (or fetch the new release) then `docker compose up -d --build` — this rebuilds only what changed and re-applies any new database migrations on backend startup. No manual migration step needed. Instead of building locally, you can also point `docker-compose.yml`'s `backend`/`frontend` services at the pre-built multi-arch images published for each tagged release: `ghcr.io/adtz-xaav/okovision-backend:<version>` and `okovision-frontend:<version>` (`amd64`/`arm64`).
 
 ---
 
@@ -27,9 +31,9 @@ Run this on a Linux host on the same local network as your boiler (a NAS with Do
 
 Supervision et pilotage auto-hébergés pour une chaudière à granulés Okofen Pellematic Touch. Conteneurisé et portable — à faire tourner sur sa propre chaudière, sur n'importe quel hôte Docker.
 
-Réécriture complète de l'application PHP originale [stawen/okovision](https://github.com/stawen/okovision) (conservée pour référence dans [`legacy/`](legacy/)). Voir `CLAUDE.md` pour l'architecture et les conventions.
+Réécriture complète de l'application PHP originale [stawen/okovision](https://github.com/stawen/okovision) (conservée pour référence dans [`legacy/`](legacy/)). Voir `CLAUDE.md` pour l'architecture et les conventions, et `CHANGELOG.md` pour l'historique des versions.
 
-Statut : réécriture en cours. `backend/` et `frontend/` constituent la nouvelle application ; `legacy/` n'est plus maintenu.
+Statut : stable, première version taguée (`v1.0.0`). `backend/` et `frontend/` constituent l'application actuelle ; `legacy/` n'est plus maintenu.
 
 ## Déploiement
 
@@ -37,5 +41,9 @@ Statut : réécriture en cours. `backend/` et `frontend/` constituent la nouvell
 
 1. Copier `.env.example` en `.env` et renseigner les deux secrets générés (commandes en commentaire dans le fichier : `openssl rand -base64 48` pour `JWT_SECRET`, `openssl rand -hex 32` pour `BOILER_CREDENTIALS_KEY`). Définir un vrai `POSTGRES_PASSWORD`. Ajuster `BACKEND_PORT`/`FRONTEND_PORT` si les valeurs par défaut (4000/8080) sont déjà utilisées sur l'hôte.
 2. `docker compose up -d --build` — construit et démarre `postgres`, `backend`, `frontend` ; les migrations de base de données s'appliquent automatiquement au démarrage du backend.
-3. Ouvrir `http://<hôte>:<FRONTEND_PORT>` et créer un compte — le premier compte créé devient le compte ADMIN/propriétaire.
+3. Ouvrir `http://<hôte>:<FRONTEND_PORT>` et créer un compte — le premier compte créé devient le compte ADMIN/propriétaire. Créer ce compte tout de suite après le premier démarrage : quiconque atteint l'application avant vous en devient l'administrateur à votre place — ne pas exposer le port à internet avant cette étape (rester sur le réseau local ou derrière un VPN).
 4. Depuis la page admin **Capteurs**, renseigner l'adresse IP locale de la chaudière et ses propres identifiants de connexion web (pas le compte Okovision) pour activer l'historique et les valeurs/pilotage en temps réel.
+
+### Mise à jour
+
+`git pull` (ou récupérer la nouvelle version) puis `docker compose up -d --build` — seuls les services modifiés sont reconstruits, et les nouvelles migrations de base de données s'appliquent automatiquement au démarrage du backend. Aucune étape de migration manuelle. Plutôt que de reconstruire localement, `docker-compose.yml` peut aussi pointer les services `backend`/`frontend` vers les images multi-architecture publiées à chaque version taguée : `ghcr.io/adtz-xaav/okovision-backend:<version>` et `okovision-frontend:<version>` (`amd64`/`arm64`).

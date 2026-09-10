@@ -1,5 +1,8 @@
 export interface Dictionary {
   appName: string;
+  common: {
+    confirmDelete: string;
+  };
   login: {
     title: string;
     email: string;
@@ -75,6 +78,13 @@ export interface Dictionary {
     liveTagDivisor: string;
     liveTagAdd: string;
     liveTagHint: string;
+    liveTagMin: string;
+    liveTagMax: string;
+    liveTagBoundsHint: string;
+    runJob: string;
+    runStatus: string;
+    runStarted: string;
+    runError: string;
   };
   graphs: {
     title: string;
@@ -129,6 +139,9 @@ export interface Dictionary {
 
 export const en: Dictionary = {
   appName: "Okovision",
+  common: {
+    confirmDelete: "Delete this? This cannot be undone.",
+  },
   login: {
     title: "Sign in",
     email: "Email",
@@ -204,6 +217,13 @@ export const en: Dictionary = {
     liveTagDivisor: "Divisor",
     liveTagAdd: "Add live value",
     liveTagHint: "The real tag path on the boiler, e.g. CAPPL:LOCAL.oekomode. The boiler sends raw scaled integers (e.g. 94 for 9.4°C) — divisor converts to and from the real value.",
+    liveTagMin: "Minimum value (optional)",
+    liveTagMax: "Maximum value (optional)",
+    liveTagBoundsHint: "If set, values outside this range are rejected before anything is sent to the boiler.",
+    runJob: "Job",
+    runStatus: "Status",
+    runStarted: "Started",
+    runError: "Error",
   },
   graphs: {
     title: "Graphs",

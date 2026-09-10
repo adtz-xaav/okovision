@@ -1,5 +1,6 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { api, ApiError, type LiveTag, type Sensor, type SchedulerRun } from "../lib/api";
+import { formatDateTime, type Language } from "../hooks/useLocale";
 import type { Dictionary } from "../locales/en";
 
 type SensorFormState = {
@@ -19,11 +20,22 @@ type LiveTagFormState = {
   writable: boolean;
   divisor: string;
   unit: string;
+  minValue: string;
+  maxValue: string;
 };
 
-const emptyLiveTagForm: LiveTagFormState = { key: "", label: "", tag: "", writable: false, divisor: "1", unit: "" };
+const emptyLiveTagForm: LiveTagFormState = {
+  key: "",
+  label: "",
+  tag: "",
+  writable: false,
+  divisor: "1",
+  unit: "",
+  minValue: "",
+  maxValue: "",
+};
 
-export function SensorsPage({ t }: { t: Dictionary }) {
+export function SensorsPage({ t, language }: { t: Dictionary; language: Language }) {
   const [sensors, setSensors] = useState<Sensor[]>([]);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState<SensorFormState>(emptyForm);
@@ -114,6 +126,7 @@ export function SensorsPage({ t }: { t: Dictionary }) {
   }
 
   async function removeSensor(id: string) {
+    if (!window.confirm(t.common.confirmDelete)) return;
     await api.deleteSensor(id);
     loadSensors();
   }
@@ -169,6 +182,8 @@ export function SensorsPage({ t }: { t: Dictionary }) {
       writable: liveTag.writable,
       divisor: String(liveTag.divisor),
       unit: liveTag.unit ?? "",
+      minValue: liveTag.minValue === null ? "" : String(liveTag.minValue),
+      maxValue: liveTag.maxValue === null ? "" : String(liveTag.maxValue),
     });
     setLiveTagFormError(null);
   }
@@ -183,6 +198,8 @@ export function SensorsPage({ t }: { t: Dictionary }) {
       writable: liveTagForm.writable,
       divisor: Number(liveTagForm.divisor) || 1,
       unit: liveTagForm.unit || undefined,
+      minValue: liveTagForm.minValue === "" ? undefined : Number(liveTagForm.minValue),
+      maxValue: liveTagForm.maxValue === "" ? undefined : Number(liveTagForm.maxValue),
     };
     try {
       if (editingLiveTagId === "new") {
@@ -198,6 +215,7 @@ export function SensorsPage({ t }: { t: Dictionary }) {
   }
 
   async function removeLiveTag(id: string) {
+    if (!window.confirm(t.common.confirmDelete)) return;
     await api.deleteLiveTag(id);
     loadLiveTags();
   }
@@ -248,10 +266,10 @@ export function SensorsPage({ t }: { t: Dictionary }) {
             <table>
               <thead>
                 <tr>
-                  <th>Job</th>
-                  <th>Status</th>
-                  <th>Started</th>
-                  <th>Error</th>
+                  <th>{t.sensors.runJob}</th>
+                  <th>{t.sensors.runStatus}</th>
+                  <th>{t.sensors.runStarted}</th>
+                  <th>{t.sensors.runError}</th>
                 </tr>
               </thead>
               <tbody>
@@ -259,7 +277,7 @@ export function SensorsPage({ t }: { t: Dictionary }) {
                   <tr key={run.id}>
                     <td>{run.job}</td>
                     <td>{run.status}</td>
-                    <td>{new Date(run.startedAt).toLocaleString()}</td>
+                    <td>{formatDateTime(run.startedAt, language)}</td>
                     <td>{run.error ?? "—"}</td>
                   </tr>
                 ))}
@@ -436,7 +454,16 @@ export function SensorsPage({ t }: { t: Dictionary }) {
               {t.sensors.unit}
               <input value={liveTagForm.unit} onChange={(e) => setLiveTagForm({ ...liveTagForm, unit: e.target.value })} />
             </label>
+            <label>
+              {t.sensors.liveTagMin}
+              <input type="number" step="any" value={liveTagForm.minValue} onChange={(e) => setLiveTagForm({ ...liveTagForm, minValue: e.target.value })} />
+            </label>
+            <label>
+              {t.sensors.liveTagMax}
+              <input type="number" step="any" value={liveTagForm.maxValue} onChange={(e) => setLiveTagForm({ ...liveTagForm, maxValue: e.target.value })} />
+            </label>
             <p className="field-hint">{t.sensors.liveTagHint}</p>
+            <p className="field-hint">{t.sensors.liveTagBoundsHint}</p>
             {liveTagFormError && (
               <p className="login-error" role="alert">
                 {liveTagFormError}

@@ -3,6 +3,7 @@ import request from "supertest";
 import { createApp } from "../src/app.js";
 import { encryptSecret } from "../src/lib/crypto.js";
 import { prisma } from "../src/lib/prisma.js";
+import { authRateLimitStore } from "../src/routes/auth.routes.js";
 import { registerAndLogin } from "./helpers/auth.js";
 
 const app = createApp();
@@ -11,6 +12,7 @@ beforeEach(async () => {
   await prisma.liveTag.deleteMany();
   await prisma.boilerConnection.deleteMany();
   await prisma.user.deleteMany();
+  await authRateLimitStore.resetAll();
 });
 
 afterEach(() => {
@@ -140,6 +142,23 @@ describe("POST /api/live-tags/:id/set", () => {
 
     const setCall = fetchMock.mock.calls.find(([url]: [string]) => String(url).includes("action=set"));
     expect(JSON.parse(setCall![1].body)).toEqual({ "CAPPL:LOCAL.oekomode": "1" });
+  });
+
+  it("rejects a value outside the configured min/max bounds without touching the boiler", async () => {
+    const { cookie } = await registerAndLogin(app, "admin@example.com");
+    await withConnection();
+    const liveTag = await prisma.liveTag.create({
+      data: { key: "eco_mode", label: "Eco mode", tag: "CAPPL:LOCAL.oekomode", writable: true, divisor: 1, minValue: 0, maxValue: 1 },
+    });
+
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+
+    const tooHigh = await request(app).post(`/api/live-tags/${liveTag.id}/set`).set("Cookie", cookie).send({ value: 2 });
+    expect(tooHigh.status).toBe(400);
+    const tooLow = await request(app).post(`/api/live-tags/${liveTag.id}/set`).set("Cookie", cookie).send({ value: -1 });
+    expect(tooLow.status).toBe(400);
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 
   it("is forbidden for a viewer", async () => {

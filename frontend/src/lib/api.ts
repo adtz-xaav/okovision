@@ -44,6 +44,8 @@ export type LiveTag = {
   writable: boolean;
   divisor: number;
   unit: string | null;
+  minValue: number | null;
+  maxValue: number | null;
 };
 
 export type LiveTagInput = {
@@ -53,6 +55,8 @@ export type LiveTagInput = {
   writable: boolean;
   divisor: number;
   unit?: string;
+  minValue?: number;
+  maxValue?: number;
 };
 
 export type LiveReading = {

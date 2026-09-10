@@ -157,6 +157,7 @@ export function SynthesisPage({ t, isAdmin }: { t: Dictionary; isAdmin: boolean 
   }
 
   async function removeSeason(id: string) {
+    if (!window.confirm(t.common.confirmDelete)) return;
     await api.deleteSeason(id);
     if (selectedSeasonId === id) setSelectedSeasonId("");
     loadSeasons();
@@ -192,6 +193,7 @@ export function SynthesisPage({ t, isAdmin }: { t: Dictionary; isAdmin: boolean 
   }
 
   async function removeSiloEvent(id: string) {
+    if (!window.confirm(t.common.confirmDelete)) return;
     await api.deleteSiloEvent(id);
     loadSiloEvents();
   }

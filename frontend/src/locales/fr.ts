@@ -2,6 +2,9 @@ import type { Dictionary } from "./en";
 
 export const fr: Dictionary = {
   appName: "Okovision",
+  common: {
+    confirmDelete: "Supprimer ? Cette action est irréversible.",
+  },
   login: {
     title: "Connexion",
     email: "Adresse e-mail",
@@ -77,6 +80,13 @@ export const fr: Dictionary = {
     liveTagDivisor: "Diviseur",
     liveTagAdd: "Ajouter une valeur temps réel",
     liveTagHint: "Le chemin réel de la variable sur la chaudière, par ex. CAPPL:LOCAL.oekomode. La chaudière envoie des entiers bruts à l'échelle (ex. 94 pour 9,4°C) — le diviseur convertit vers et depuis la valeur réelle.",
+    liveTagMin: "Valeur minimale (optionnel)",
+    liveTagMax: "Valeur maximale (optionnel)",
+    liveTagBoundsHint: "Si renseignées, toute valeur hors de cette plage est rejetée avant d'être envoyée à la chaudière.",
+    runJob: "Tâche",
+    runStatus: "Statut",
+    runStarted: "Démarrée",
+    runError: "Erreur",
   },
   graphs: {
     title: "Graphiques",
