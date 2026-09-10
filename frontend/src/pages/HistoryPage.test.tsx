@@ -13,7 +13,7 @@ describe("HistoryPage", () => {
   it("prompts to configure a sensor when none exist", async () => {
     vi.mocked(api.listSensors).mockResolvedValue([]);
 
-    render(<HistoryPage t={en} />);
+    render(<HistoryPage t={en} language="en" />);
 
     expect(await screen.findByText(en.history.noSensors)).toBeInTheDocument();
   });
@@ -23,7 +23,7 @@ describe("HistoryPage", () => {
       { id: "s1", key: "outdoor_temp", label: "Outdoor", unit: "°C", correction: 0, csvColumn: 0 },
     ]);
 
-    render(<HistoryPage t={en} />);
+    render(<HistoryPage t={en} language="en" />);
 
     expect(await screen.findByText("Outdoor (°C)")).toBeInTheDocument();
     expect(screen.getByText(en.history.selectSensorPrompt)).toBeInTheDocument();
@@ -36,7 +36,7 @@ describe("HistoryPage", () => {
     ]);
     vi.mocked(api.getReadings).mockResolvedValue([{ timestamp: "2026-09-09T00:00:00.000Z", value: 18.5 }]);
 
-    render(<HistoryPage t={en} />);
+    render(<HistoryPage t={en} language="en" />);
     await screen.findByText("Outdoor");
 
     const { default: userEvent } = await import("@testing-library/user-event");

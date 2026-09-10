@@ -73,6 +73,8 @@ model LiveTag {
   writable  Boolean  @default(false)
   divisor   Float    @default(1)
   unit      String?
+  minValue  Float? // real-value (post-divisor) lower bound enforced on writes; null = unbounded
+  maxValue  Float? // real-value (post-divisor) upper bound enforced on writes; null = unbounded
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }

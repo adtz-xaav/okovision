@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "LiveTag" ADD COLUMN     "minValue" DOUBLE PRECISION,
+ADD COLUMN     "maxValue" DOUBLE PRECISION;

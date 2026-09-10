@@ -16,6 +16,7 @@ Automation is handled by `SchedulerService` (cron-based and DAG dependency-trigg
 - That branch must be tested before it can be merged.
 - Before opening a PR, run the relevant test suite(s) locally (`npm run test:backend` and/or `npm run test:frontend` depending on what changed) — never open a PR without having run them.
 - Every PR description must include a short test result summary (e.g. `Backend: 42 passed`, `Frontend: 12 passed`) as justification that the branch was tested. CI (`.github/workflows/test.yml`) re-runs both suites on every PR as a second check.
+- Before merge, the branch must also be deployed to the QNAP reference instance (see `devops-engineer` agent) so Xavier can validate it against the real boiler — CI passing alone is not sufficient grounds to request a merge.
 - Only Xavier can approve/perform the merge into `dev`. No autonomous merging.
 
 ## Security Rules (mandatory, non-negotiable)
@@ -45,6 +46,10 @@ Automation is handled by `SchedulerService` (cron-based and DAG dependency-trigg
 - Okovision runs containerized (Docker Compose: `postgres` + `backend` + `frontend`) so any Pellematic Touch owner can self-host it — no host/port/secret is ever hardcoded in the app or `docker-compose.yml`, only `.env`.
 - Xavier's own dogfooding instance runs on his QNAP NAS via Container Station — connection details, QNAP-specific quirks (no `git`, Docker binary off `$PATH`, manual `docker compose` plugin install, port 8180 not 8080), and the redeploy procedure are documented in the `devops-engineer` agent definition (`.claude/agents/devops-agent.md`), not here, since that's operational info about Xavier's infra rather than the product.
 - Once a fix/feature is implemented (and its branch tested), the **`devops-engineer` agent** redeploys that reference instance proactively — don't wait for Xavier to ask. Default to a targeted rebuild of the affected service(s). Full teardown (wiping the Postgres volume) is only for when the test explicitly requires a clean-slate instance — not the default after every fix.
+
+## Releases
+
+- Tagging a version (`vX.Y.Z`) and publishing multi-arch (amd64/arm64) images to GHCR is handled by `.github/workflows/release.yml`, triggered on tag push. Version bumps, the tag itself, and `CHANGELOG.md` upkeep are the **`devops-engineer` agent**'s job — see its definition for the exact procedure.
 
 ## Notes
 

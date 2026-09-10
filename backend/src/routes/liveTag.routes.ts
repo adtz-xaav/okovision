@@ -72,6 +72,14 @@ liveTagRouter.post("/:id/set", requireRole(UserRole.ADMIN), validateBody(setLive
     res.status(400).json({ error: "This tag is not marked as writable" });
     return;
   }
+  if (liveTag.minValue !== null && value < liveTag.minValue) {
+    res.status(400).json({ error: `Value must be >= ${liveTag.minValue}` });
+    return;
+  }
+  if (liveTag.maxValue !== null && value > liveTag.maxValue) {
+    res.status(400).json({ error: `Value must be <= ${liveTag.maxValue}` });
+    return;
+  }
   const credentials = await getBoilerCredentials();
   if (!credentials) {
     res.status(409).json({ error: "Boiler live credentials are not configured" });

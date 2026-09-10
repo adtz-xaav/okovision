@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { api, type Reading, type Sensor } from "../lib/api";
+import { formatDateTime, type Language } from "../hooks/useLocale";
 import type { Dictionary } from "../locales/en";
 
 function defaultRange() {
@@ -9,7 +10,7 @@ function defaultRange() {
   return { from: toLocalInput(from), to: toLocalInput(to) };
 }
 
-export function HistoryPage({ t }: { t: Dictionary }) {
+export function HistoryPage({ t, language }: { t: Dictionary; language: Language }) {
   const [sensors, setSensors] = useState<Sensor[]>([]);
   const [sensorId, setSensorId] = useState("");
   const [range, setRange] = useState(defaultRange);
@@ -80,7 +81,7 @@ export function HistoryPage({ t }: { t: Dictionary }) {
             <tbody>
               {readings.map((reading) => (
                 <tr key={reading.timestamp}>
-                  <td>{new Date(reading.timestamp).toLocaleString()}</td>
+                  <td>{formatDateTime(reading.timestamp, language)}</td>
                   <td>{reading.value}</td>
                 </tr>
               ))}

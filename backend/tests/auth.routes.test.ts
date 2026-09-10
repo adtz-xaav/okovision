@@ -2,11 +2,13 @@ import { afterAll, beforeEach, describe, expect, it } from "vitest";
 import request from "supertest";
 import { createApp } from "../src/app.js";
 import { prisma } from "../src/lib/prisma.js";
+import { authRateLimitStore } from "../src/routes/auth.routes.js";
 
 const app = createApp();
 
 beforeEach(async () => {
   await prisma.user.deleteMany();
+  await authRateLimitStore.resetAll();
 });
 
 afterAll(async () => {
@@ -48,6 +50,21 @@ describe("POST /api/auth/register", () => {
   it("rejects a short password", async () => {
     const res = await request(app).post("/api/auth/register").send({ email: "short@example.com", password: "short" });
     expect(res.status).toBe(400);
+  });
+
+  it("only ever grants ADMIN to one of two concurrent first-registrations", async () => {
+    const [resA, resB] = await Promise.all([
+      request(app).post("/api/auth/register").send({ email: "racer-a@example.com", password: "correct-horse-battery" }),
+      request(app).post("/api/auth/register").send({ email: "racer-b@example.com", password: "correct-horse-battery" }),
+    ]);
+
+    expect(resA.status).toBe(201);
+    expect(resB.status).toBe(201);
+    const roles = [resA.body.role, resB.body.role].sort();
+    expect(roles).toEqual(["ADMIN", "VIEWER"]);
+
+    const adminCount = await prisma.user.count({ where: { role: "ADMIN" } });
+    expect(adminCount).toBe(1);
   });
 });
 
