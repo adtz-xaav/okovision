@@ -28,6 +28,25 @@ Run this on a Linux host on the same local network as your boiler (a NAS with Do
 3. Open `http://<host>:<FRONTEND_PORT>` and register — the first account created becomes the ADMIN/owner account. Register right after first startup: anyone who reaches the app before you becomes the admin instead, so don't expose the port to the internet before this step (keep it on your LAN or behind a VPN).
 4. From the admin **Sensors** page, set your boiler's LAN IP and its own web-UI login (not your Okovision account) to enable history ingestion and live values/control.
 
+### Exposing this to the internet (reverse proxy + TLS)
+
+The default setup ("keep it on your LAN or behind a VPN") is the right call for most home installs. If you do want to reach your boiler's dashboard from outside your LAN — a genuinely common ask — put a TLS-terminating reverse proxy in front instead of port-forwarding the app directly: without TLS, your session cookie and boiler control commands travel in the clear.
+
+The lowest-effort option is [Caddy](https://caddyserver.com/), with automatic Let's Encrypt certificates:
+
+```caddyfile
+okovision.example.com {
+    reverse_proxy localhost:8080
+}
+```
+
+[Traefik](https://traefik.io/traefik/) with its ACME provider is a similar low-effort alternative if you're already running it for other services; `nginx` + `certbot` also works but needs manual certificate renewal setup.
+
+Once TLS is in front of the app, in `.env`:
+
+- Set `COOKIE_SECURE=true` — required, or the session cookie won't be sent at all. **Never set this without TLS**: a `Secure` cookie is silently dropped by the browser over plain HTTP, which breaks login.
+- Set `CORS_ORIGIN` to your public HTTPS origin (e.g. `https://okovision.example.com`) — it defaults to `http://localhost:<FRONTEND_PORT>`, which only works for local/LAN access.
+
 ### Updating
 
 `git pull` (or fetch the new release) then `docker compose up -d --build` — this rebuilds only what changed and re-applies any new database migrations on backend startup. No manual migration step needed. Instead of building locally, you can also point `docker-compose.yml`'s `backend`/`frontend` services at the pre-built multi-arch images published for each tagged release: `ghcr.io/adtz-xaav/okovision-backend:<version>` and `okovision-frontend:<version>` (`amd64`/`arm64`).
@@ -92,6 +111,25 @@ Statut : stable, version taguée (`v2.0.0`).
 2. `docker compose up -d --build` — construit et démarre `postgres`, `backend`, `frontend` ; les migrations de base de données s'appliquent automatiquement au démarrage du backend.
 3. Ouvrir `http://<hôte>:<FRONTEND_PORT>` et créer un compte — le premier compte créé devient le compte ADMIN/propriétaire. Créer ce compte tout de suite après le premier démarrage : quiconque atteint l'application avant vous en devient l'administrateur à votre place — ne pas exposer le port à internet avant cette étape (rester sur le réseau local ou derrière un VPN).
 4. Depuis la page admin **Capteurs**, renseigner l'adresse IP locale de la chaudière et ses propres identifiants de connexion web (pas le compte Okovision) pour activer l'historique et les valeurs/pilotage en temps réel.
+
+### Exposer l'application sur internet (reverse proxy + TLS)
+
+La configuration par défaut (« rester sur le réseau local ou derrière un VPN ») est le bon choix pour la plupart des installations domestiques. Pour accéder au tableau de bord de la chaudière depuis l'extérieur du réseau local — une demande fréquente et légitime — placer un reverse proxy avec terminaison TLS devant l'application plutôt que de rediriger le port directement : sans TLS, le cookie de session et les commandes de pilotage de la chaudière circulent en clair.
+
+L'option la plus simple est [Caddy](https://caddyserver.com/), avec certificats Let's Encrypt automatiques :
+
+```caddyfile
+okovision.example.com {
+    reverse_proxy localhost:8080
+}
+```
+
+[Traefik](https://traefik.io/traefik/) avec son fournisseur ACME est une alternative similaire si vous l'utilisez déjà pour d'autres services ; `nginx` + `certbot` fonctionne aussi mais nécessite une configuration manuelle du renouvellement des certificats.
+
+Une fois le TLS en place devant l'application, dans `.env` :
+
+- Définir `COOKIE_SECURE=true` — obligatoire, sinon le cookie de session n'est pas envoyé du tout. **Ne jamais l'activer sans TLS** : un cookie `Secure` est silencieusement rejeté par le navigateur en HTTP simple, ce qui casse la connexion.
+- Définir `CORS_ORIGIN` avec l'origine HTTPS publique (ex. `https://okovision.example.com`) — la valeur par défaut est `http://localhost:<FRONTEND_PORT>`, qui ne fonctionne que pour un accès local/réseau local.
 
 ### Mise à jour
 
