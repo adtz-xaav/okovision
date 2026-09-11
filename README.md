@@ -13,7 +13,7 @@ Status: stable, first tagged release (`v1.0.0`).
 
 ## License
 
-Licensed under the [PolyForm Noncommercial License 1.0.0](LICENSE) — free to use, modify, and self-host for any noncommercial purpose (personal, hobby, research, education, nonprofit). Commercial use requires a separate license from SAS Additiz.
+Licensed under the [PolyForm Noncommercial License 1.0.0](LICENSE) — free to use, modify, and self-host for any noncommercial purpose (personal, hobby, research, education, nonprofit). Commercial use requires a separate license from [SAS Additiz](https://additiz.com).
 
 ## Deployment
 
@@ -53,4 +53,4 @@ Statut : stable, première version taguée (`v1.0.0`).
 
 ## Licence
 
-Sous licence [PolyForm Noncommercial License 1.0.0](LICENSE) — utilisation, modification et auto-hébergement libres pour tout usage non commercial (personnel, loisir, recherche, éducation, associatif). Un usage commercial nécessite une licence distincte auprès de SAS Additiz.
+Sous licence [PolyForm Noncommercial License 1.0.0](LICENSE) — utilisation, modification et auto-hébergement libres pour tout usage non commercial (personnel, loisir, recherche, éducation, associatif). Un usage commercial nécessite une licence distincte auprès de [SAS Additiz](https://additiz.com).
