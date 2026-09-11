@@ -28,6 +28,19 @@ Run this on a Linux host on the same local network as your boiler (a NAS with Do
 
 `git pull` (or fetch the new release) then `docker compose up -d --build` — this rebuilds only what changed and re-applies any new database migrations on backend startup. No manual migration step needed. Instead of building locally, you can also point `docker-compose.yml`'s `backend`/`frontend` services at the pre-built multi-arch images published for each tagged release: `ghcr.io/adtz-xaav/okovision-backend:<version>` and `okovision-frontend:<version>` (`amd64`/`arm64`).
 
+### Connecting a local DB client (optional)
+
+Postgres isn't published to the host by default — only `backend` can reach it, over the internal Compose network. If you want to connect a local client (`psql`, a GUI tool) for debugging, add a `docker-compose.override.yml` next to `docker-compose.yml`:
+
+```yaml
+services:
+  postgres:
+    ports:
+      - "5432:5432"
+```
+
+`docker compose up -d` automatically layers this file on top — no flag needed. Don't do this on an internet-facing host.
+
 ---
 
 # Okovision (FR)
@@ -50,6 +63,19 @@ Statut : stable, version taguée (`v2.0.0`).
 ### Mise à jour
 
 `git pull` (ou récupérer la nouvelle version) puis `docker compose up -d --build` — seuls les services modifiés sont reconstruits, et les nouvelles migrations de base de données s'appliquent automatiquement au démarrage du backend. Aucune étape de migration manuelle. Plutôt que de reconstruire localement, `docker-compose.yml` peut aussi pointer les services `backend`/`frontend` vers les images multi-architecture publiées à chaque version taguée : `ghcr.io/adtz-xaav/okovision-backend:<version>` et `okovision-frontend:<version>` (`amd64`/`arm64`).
+
+### Connexion d'un client BDD local (optionnel)
+
+Postgres n'est pas exposé sur l'hôte par défaut — seul `backend` peut l'atteindre, via le réseau interne de Compose. Pour connecter un client local (`psql`, un outil graphique) à des fins de débogage, ajouter un fichier `docker-compose.override.yml` à côté de `docker-compose.yml` :
+
+```yaml
+services:
+  postgres:
+    ports:
+      - "5432:5432"
+```
+
+`docker compose up -d` superpose automatiquement ce fichier — aucune option à ajouter. À ne pas faire sur un hôte exposé à internet.
 
 ## Licence
 
