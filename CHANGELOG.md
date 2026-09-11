@@ -2,6 +2,11 @@
 
 All notable user-visible changes to Okovision are documented here. Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [2.0.1] — 2026-09-11
+
+### Added
+- Raw boiler CSV logs are now archived in the database as they're ingested, so daily history survives the Pellematic Touch's own ~4-day log retention window. If an ingestion run is ever down longer than that, or if the parsing/column-mapping logic changes later, past days can be recovered and reprocessed from the archive instead of being lost for good.
+
 ## [2.0.0] — 2026-09-11
 
 First public release of the Okovision rewrite: a full re-engineering, from scratch, of the original PHP application (versions 1.x) into a self-hosted, containerized, bilingual web app for any Okofen Pellematic Touch owner to run on their own network. Versioning starts at 2.0.0 to stay clear of the legacy app's own 1.x tags.
@@ -33,6 +38,11 @@ First public release of the Okovision rewrite: a full re-engineering, from scrat
 # Changelog (FR)
 
 Historique des changements visibles pour les utilisateurs d'Okovision. Format inspiré de [Keep a Changelog](https://keepachangelog.com/fr/).
+
+## [2.0.1] — 2026-09-11
+
+### Ajouté
+- Les journaux CSV bruts de la chaudière sont désormais archivés en base au fur et à mesure de leur import, afin que l'historique journalier survive à la fenêtre de rétention d'environ 4 jours de la Pellematic Touch elle-même. En cas d'arrêt de l'import plus long que cette fenêtre, ou si la logique d'analyse/correspondance des colonnes évolue par la suite, les journées passées peuvent être récupérées et retraitées depuis l'archive plutôt que d'être perdues définitivement.
 
 ## [2.0.0] — 2026-09-11
 
