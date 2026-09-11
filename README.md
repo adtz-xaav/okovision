@@ -93,6 +93,16 @@ docker compose up -d                       # now start backend/frontend
 
 Restoring before starting `backend` matters: `prisma migrate deploy` runs on backend startup and needs to see the restored schema/data, not a fresh empty database.
 
+### Resetting a forgotten password
+
+There's no email-based "forgot password" flow — this is a self-host app with no assumed mail server. If you're locked out, reset any user's password directly from the running backend container:
+
+```bash
+docker compose exec backend node dist/scripts/reset-password.js <email> <newPassword>
+```
+
+The new password must be at least 12 characters and is hashed the same way registration does (bcrypt, 12 rounds) — no need to hand-hash anything.
+
 ---
 
 # Okovision (FR)
@@ -176,6 +186,16 @@ docker compose up -d                       # démarrer ensuite backend/frontend
 ```
 
 L'ordre compte : `prisma migrate deploy` s'exécute au démarrage du backend et doit trouver le schéma/les données restaurées, pas une base vide.
+
+### Réinitialiser un mot de passe oublié
+
+Il n'y a pas de flux « mot de passe oublié » par email — l'application est auto-hébergée sans serveur mail supposé. En cas de blocage, réinitialiser le mot de passe d'un utilisateur directement depuis le conteneur backend en cours d'exécution :
+
+```bash
+docker compose exec backend node dist/scripts/reset-password.js <email> <nouveauMotDePasse>
+```
+
+Le nouveau mot de passe doit faire au moins 12 caractères et est haché de la même façon que lors de l'inscription (bcrypt, 12 tours) — aucun hachage manuel nécessaire.
 
 ## Licence
 
