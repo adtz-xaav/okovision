@@ -41,6 +41,28 @@ services:
 
 `docker compose up -d` automatically layers this file on top — no flag needed. Don't do this on an internet-facing host.
 
+### Backup and restore
+
+All state lives in the `okovision_postgres_data` volume — season history, silo deliveries, and sensor readings going back months, with no source to rebuild them from if it's lost. Back it up regularly.
+
+**Backup:**
+
+```bash
+docker compose exec postgres pg_dump -U ${POSTGRES_USER:-okovision} ${POSTGRES_DB:-okovision} > backup.sql
+```
+
+Run this on a schedule (cron, or your NAS's own backup tooling) and keep the dumps somewhere other than the host itself.
+
+**Restore** (onto a fresh instance):
+
+```bash
+docker compose up -d postgres              # start only postgres, wait for it to become healthy
+cat backup.sql | docker compose exec -T postgres psql -U ${POSTGRES_USER:-okovision} -d ${POSTGRES_DB:-okovision}
+docker compose up -d                       # now start backend/frontend
+```
+
+Restoring before starting `backend` matters: `prisma migrate deploy` runs on backend startup and needs to see the restored schema/data, not a fresh empty database.
+
 ---
 
 # Okovision (FR)
@@ -76,6 +98,28 @@ services:
 ```
 
 `docker compose up -d` superpose automatiquement ce fichier — aucune option à ajouter. À ne pas faire sur un hôte exposé à internet.
+
+### Sauvegarde et restauration
+
+Toutes les données vivent dans le volume `okovision_postgres_data` — historique des saisons, livraisons de granulés, et relevés de capteurs sur plusieurs mois, sans source pour les reconstruire en cas de perte. À sauvegarder régulièrement.
+
+**Sauvegarde :**
+
+```bash
+docker compose exec postgres pg_dump -U ${POSTGRES_USER:-okovision} ${POSTGRES_DB:-okovision} > backup.sql
+```
+
+À exécuter selon un planning (cron, ou l'outil de sauvegarde du NAS) et à conserver ailleurs que sur l'hôte lui-même.
+
+**Restauration** (sur une instance neuve) :
+
+```bash
+docker compose up -d postgres              # démarrer seulement postgres, attendre qu'il soit healthy
+cat backup.sql | docker compose exec -T postgres psql -U ${POSTGRES_USER:-okovision} -d ${POSTGRES_DB:-okovision}
+docker compose up -d                       # démarrer ensuite backend/frontend
+```
+
+L'ordre compte : `prisma migrate deploy` s'exécute au démarrage du backend et doit trouver le schéma/les données restaurées, pas une base vide.
 
 ## Licence
 
