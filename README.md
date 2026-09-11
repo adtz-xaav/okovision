@@ -73,7 +73,7 @@ services:
 
 ### Backup and restore
 
-All state lives in the `okovision_postgres_data` volume — season history, silo deliveries, and sensor readings going back months, with no source to rebuild them from if it's lost. Back it up regularly.
+All state lives in the `okovision_postgres_data` volume — season history, silo deliveries, sensor readings going back months, and the raw daily CSV logs pulled from the boiler (the boiler itself only keeps a few days on its own storage, so this database is the only durable copy). Back it up regularly.
 
 **Backup:**
 
@@ -167,7 +167,7 @@ services:
 
 ### Sauvegarde et restauration
 
-Toutes les données vivent dans le volume `okovision_postgres_data` — historique des saisons, livraisons de granulés, et relevés de capteurs sur plusieurs mois, sans source pour les reconstruire en cas de perte. À sauvegarder régulièrement.
+Toutes les données vivent dans le volume `okovision_postgres_data` — historique des saisons, livraisons de granulés, relevés de capteurs sur plusieurs mois, et les journaux CSV bruts récupérés depuis la chaudière (celle-ci ne conserve que quelques jours sur son propre stockage, cette base de données est donc la seule copie durable). À sauvegarder régulièrement.
 
 **Sauvegarde :**
 

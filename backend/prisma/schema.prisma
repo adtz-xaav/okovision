@@ -90,6 +90,17 @@ model SensorReading {
   @@index([sensorId, timestamp])
 }
 
+// One row per boiler log day, holding the exact CSV text as served by the boiler. The
+// Pellematic Touch only retains a rolling few days of logs on its own storage, so this is
+// the only durable copy once that window rolls past a given day — and it also means a
+// future change to parsing/column-mapping logic can be replayed against real history
+// instead of being stuck with whatever SensorReading rows already exist.
+model RawCsvArchive {
+  date      String   @id // YYYY-MM-DD, matches the boiler's own touch_YYYYMMDD.csv naming
+  content   String
+  fetchedAt DateTime @default(now())
+}
+
 model Graph {
   id        String        @id @default(uuid())
   name      String

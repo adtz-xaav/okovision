@@ -14,11 +14,13 @@ function fakeClient(overrides: Partial<BoilerClient> = {}): BoilerClient {
 beforeEach(async () => {
   await prisma.sensorReading.deleteMany();
   await prisma.sensor.deleteMany();
+  await prisma.rawCsvArchive.deleteMany();
 });
 
 afterAll(async () => {
   await prisma.sensorReading.deleteMany();
   await prisma.sensor.deleteMany();
+  await prisma.rawCsvArchive.deleteMany();
   await prisma.$disconnect();
 });
 
@@ -70,6 +72,52 @@ describe("ingestDay", () => {
     expect(result).toEqual({ date: "2026-09-09", rowsParsed: 0, readingsWritten: 0 });
     expect(fetchDayCsv).not.toHaveBeenCalled();
   });
+
+  it("archives the raw CSV text on every successful live fetch", async () => {
+    await prisma.sensor.create({ data: { key: "outdoor_temp", label: "Outdoor", csvColumn: 0 } });
+    const csv = "09.09.2026;00:00:00;18,5";
+    const client = fakeClient({ fetchDayCsv: vi.fn().mockResolvedValue(csv) });
+
+    await ingestDay(client, "2026-09-09");
+
+    const archived = await prisma.rawCsvArchive.findUniqueOrThrow({ where: { date: "2026-09-09" } });
+    expect(archived.content).toBe(csv);
+  });
+
+  it("overwrites the archived copy on re-fetch so a growing 'today' log doesn't go stale", async () => {
+    await prisma.sensor.create({ data: { key: "outdoor_temp", label: "Outdoor", csvColumn: 0 } });
+    const client = fakeClient({
+      fetchDayCsv: vi
+        .fn()
+        .mockResolvedValueOnce("09.09.2026;00:00:00;18,5")
+        .mockResolvedValueOnce("09.09.2026;00:00:00;18,5\n09.09.2026;00:05:00;18,4"),
+    });
+
+    await ingestDay(client, "2026-09-09");
+    await ingestDay(client, "2026-09-09");
+
+    const archived = await prisma.rawCsvArchive.findUniqueOrThrow({ where: { date: "2026-09-09" } });
+    expect(archived.content).toContain("00:05:00");
+  });
+
+  it("falls back to the archived CSV when the boiler can no longer serve that day", async () => {
+    await prisma.sensor.create({ data: { key: "outdoor_temp", label: "Outdoor", csvColumn: 0 } });
+    await prisma.rawCsvArchive.create({
+      data: { date: "2026-09-05", content: "05.09.2026;00:00:00;12,0" },
+    });
+    const fetchDayCsv = vi.fn().mockRejectedValue(new Error("No boiler log for 2026-09-05"));
+
+    const result = await ingestDay(fakeClient({ fetchDayCsv }), "2026-09-05");
+
+    expect(result.readingsWritten).toBe(1);
+  });
+
+  it("throws when the boiler can't serve the day and there's no archive to fall back to", async () => {
+    await prisma.sensor.create({ data: { key: "outdoor_temp", label: "Outdoor", csvColumn: 0 } });
+    const fetchDayCsv = vi.fn().mockRejectedValue(new Error("No boiler log for 2026-09-05"));
+
+    await expect(ingestDay(fakeClient({ fetchDayCsv }), "2026-09-05")).rejects.toThrow("No boiler log for 2026-09-05");
+  });
 });
 
 describe("isDateFullyIngested", () => {
@@ -113,5 +161,19 @@ describe("runBoilerIngest", () => {
     expect(fetchDayCsv).toHaveBeenCalledTimes(1);
     expect(fetchDayCsv).toHaveBeenCalledWith("2026-09-09");
     expect(result).toEqual({ datesConsidered: 2, readingsWritten: 1 });
+  });
+
+  it("still ingests an archived day that has since rolled off the boiler's own listing", async () => {
+    await prisma.sensor.create({ data: { key: "outdoor_temp", label: "Outdoor", csvColumn: 0 } });
+    await prisma.rawCsvArchive.create({
+      data: { date: "2026-09-05", content: "05.09.2026;00:00:00;12,0" },
+    });
+
+    const fetchDayCsv = vi.fn().mockRejectedValue(new Error("No boiler log for 2026-09-05"));
+    const client = fakeClient({ listAvailableDates: vi.fn().mockResolvedValue([]), fetchDayCsv });
+
+    const result = await runBoilerIngest(client);
+
+    expect(result).toEqual({ datesConsidered: 1, readingsWritten: 1 });
   });
 });
