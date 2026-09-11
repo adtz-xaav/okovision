@@ -15,6 +15,10 @@ Status: stable, tagged release (`v2.0.0`).
 
 Licensed under the [PolyForm Noncommercial License 1.0.0](LICENSE) — free to use, modify, and self-host for any noncommercial purpose (personal, hobby, research, education, nonprofit). Commercial use requires a separate license from [SAS Additiz](https://additiz.com).
 
+## Contributing
+
+This is currently a solo-maintained project, not actively seeking outside contributions. Bug reports and feature suggestions are welcome via GitHub Issues, but please open one before sending a pull request — unsolicited PRs may not get reviewed.
+
 ## Deployment
 
 Run this on a Linux host on the same local network as your boiler (a NAS with Docker/Container Station support, a Raspberry Pi, a mini PC — anything that can run Docker Compose). **Don't use Docker Desktop for Mac or Windows for a real deployment**: its containers sit behind a VM that reaches the internet but not your LAN, so the app would never be able to reach the boiler. It's fine for frontend-only development.
@@ -27,6 +31,13 @@ Run this on a Linux host on the same local network as your boiler (a NAS with Do
 ### Updating
 
 `git pull` (or fetch the new release) then `docker compose up -d --build` — this rebuilds only what changed and re-applies any new database migrations on backend startup. No manual migration step needed. Instead of building locally, you can also point `docker-compose.yml`'s `backend`/`frontend` services at the pre-built multi-arch images published for each tagged release: `ghcr.io/adtz-xaav/okovision-backend:<version>` and `okovision-frontend:<version>` (`amd64`/`arm64`).
+
+### Running this long-term
+
+For anyone keeping this running unattended for months, not just as a home-LAN gadget:
+
+- **Health monitoring**: point an uptime monitor (self-hosted [Uptime Kuma](https://github.com/louislam/uptime-kuma), or a hosted one like [Healthchecks.io](https://healthchecks.io/)) at `http://<host>:<BACKEND_PORT>/health` to get notified if the backend goes down.
+- **Log rotation**: `docker-compose.yml` already caps each service's logs at 10MB × 3 files — Docker's default `json-file` driver has no size cap otherwise, and logs would grow unbounded.
 
 ### Connecting a local DB client (optional)
 
@@ -86,6 +97,13 @@ Statut : stable, version taguée (`v2.0.0`).
 
 `git pull` (ou récupérer la nouvelle version) puis `docker compose up -d --build` — seuls les services modifiés sont reconstruits, et les nouvelles migrations de base de données s'appliquent automatiquement au démarrage du backend. Aucune étape de migration manuelle. Plutôt que de reconstruire localement, `docker-compose.yml` peut aussi pointer les services `backend`/`frontend` vers les images multi-architecture publiées à chaque version taguée : `ghcr.io/adtz-xaav/okovision-backend:<version>` et `okovision-frontend:<version>` (`amd64`/`arm64`).
 
+### Utilisation en continu
+
+Pour qui fait tourner l'application sans surveillance pendant des mois, au-delà du simple usage domestique :
+
+- **Surveillance de disponibilité** : pointer un outil de monitoring (auto-hébergé comme [Uptime Kuma](https://github.com/louislam/uptime-kuma), ou hébergé comme [Healthchecks.io](https://healthchecks.io/)) vers `http://<hôte>:<BACKEND_PORT>/health` pour être alerté en cas de panne du backend.
+- **Rotation des logs** : `docker-compose.yml` limite déjà les logs de chaque service à 10 Mo × 3 fichiers — le pilote `json-file` par défaut de Docker n'a sinon aucune limite, et les logs grossiraient indéfiniment.
+
 ### Connexion d'un client BDD local (optionnel)
 
 Postgres n'est pas exposé sur l'hôte par défaut — seul `backend` peut l'atteindre, via le réseau interne de Compose. Pour connecter un client local (`psql`, un outil graphique) à des fins de débogage, ajouter un fichier `docker-compose.override.yml` à côté de `docker-compose.yml` :
@@ -124,3 +142,7 @@ L'ordre compte : `prisma migrate deploy` s'exécute au démarrage du backend et 
 ## Licence
 
 Sous licence [PolyForm Noncommercial License 1.0.0](LICENSE) — utilisation, modification et auto-hébergement libres pour tout usage non commercial (personnel, loisir, recherche, éducation, associatif). Un usage commercial nécessite une licence distincte auprès de [SAS Additiz](https://additiz.com).
+
+## Contribution
+
+Ce projet est pour l'instant maintenu par une seule personne, et ne recherche pas activement de contributions extérieures. Les rapports de bug et suggestions sont bienvenus via les issues GitHub, mais merci d'en ouvrir une avant d'envoyer une pull request — les PR non sollicitées pourraient ne pas être examinées.
