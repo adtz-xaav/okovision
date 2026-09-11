@@ -44,8 +44,17 @@ build/
 !.env.example
 coverage/
 
-# Claude Code local-only files (agents/CLAUDE.md are shared and tracked)
+# Claude Code local-only files
 .claude/settings.local.json
 .claude/*.local.json
 .claude/scheduled_tasks.lock
+
+# Claude Code project docs/config kept locally for development, not distributed publicly
+# (agent definitions reference real operational details — NAS hostname, network layout, etc.)
+CLAUDE.md
+.claude/agents/
+
+# Original PHP app, kept locally for reference during the rewrite — unlicensed upstream
+# code (https://github.com/stawen/okovision), not redistributed. See issue #11.
+legacy/
 

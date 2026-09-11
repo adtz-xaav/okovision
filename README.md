@@ -2,15 +2,18 @@
 
 Self-hosted monitoring and control for the Okofen Pellematic Touch pellet boiler. Containerized, portable — run it against your own boiler on any Docker host.
 
-This is a full rewrite of the original [stawen/okovision](https://github.com/stawen/okovision) PHP application (kept for reference under [`legacy/`](legacy/)). See `CLAUDE.md` for architecture and contributor guidance, and `CHANGELOG.md` for release history.
+This is a full rewrite of the original [stawen/okovision](https://github.com/stawen/okovision) PHP application. See `CHANGELOG.md` for release history.
 
-Status: stable, first tagged release (`v1.0.0`). `backend/` and `frontend/` are the current application; `legacy/` is not maintained.
+Status: stable, first tagged release (`v1.0.0`).
 
 ## Structure
 
 - `backend/` — Node.js + Express + TypeScript API, Prisma ORM, PostgreSQL.
 - `frontend/` — React + Vite + TypeScript SPA.
-- `legacy/` — the original PHP application, kept for reference during the rewrite.
+
+## License
+
+Licensed under the [PolyForm Noncommercial License 1.0.0](LICENSE) — free to use, modify, and self-host for any noncommercial purpose (personal, hobby, research, education, nonprofit). Commercial use requires a separate license from SAS Additiz.
 
 ## Deployment
 
@@ -31,9 +34,9 @@ Run this on a Linux host on the same local network as your boiler (a NAS with Do
 
 Supervision et pilotage auto-hébergés pour une chaudière à granulés Okofen Pellematic Touch. Conteneurisé et portable — à faire tourner sur sa propre chaudière, sur n'importe quel hôte Docker.
 
-Réécriture complète de l'application PHP originale [stawen/okovision](https://github.com/stawen/okovision) (conservée pour référence dans [`legacy/`](legacy/)). Voir `CLAUDE.md` pour l'architecture et les conventions, et `CHANGELOG.md` pour l'historique des versions.
+Réécriture complète de l'application PHP originale [stawen/okovision](https://github.com/stawen/okovision). Voir `CHANGELOG.md` pour l'historique des versions.
 
-Statut : stable, première version taguée (`v1.0.0`). `backend/` et `frontend/` constituent l'application actuelle ; `legacy/` n'est plus maintenu.
+Statut : stable, première version taguée (`v1.0.0`).
 
 ## Déploiement
 
@@ -47,3 +50,7 @@ Statut : stable, première version taguée (`v1.0.0`). `backend/` et `frontend/`
 ### Mise à jour
 
 `git pull` (ou récupérer la nouvelle version) puis `docker compose up -d --build` — seuls les services modifiés sont reconstruits, et les nouvelles migrations de base de données s'appliquent automatiquement au démarrage du backend. Aucune étape de migration manuelle. Plutôt que de reconstruire localement, `docker-compose.yml` peut aussi pointer les services `backend`/`frontend` vers les images multi-architecture publiées à chaque version taguée : `ghcr.io/adtz-xaav/okovision-backend:<version>` et `okovision-frontend:<version>` (`amd64`/`arm64`).
+
+## Licence
+
+Sous licence [PolyForm Noncommercial License 1.0.0](LICENSE) — utilisation, modification et auto-hébergement libres pour tout usage non commercial (personnel, loisir, recherche, éducation, associatif). Un usage commercial nécessite une licence distincte auprès de SAS Additiz.
