@@ -4,7 +4,7 @@ Self-hosted monitoring and control for the Okofen Pellematic Touch pellet boiler
 
 This is a full rewrite of the original [stawen/okovision](https://github.com/stawen/okovision) PHP application. See `CHANGELOG.md` for release history.
 
-Status: stable, first tagged release (`v1.0.0`).
+Status: stable, tagged release (`v2.0.0`).
 
 ## Structure
 
@@ -36,7 +36,7 @@ Supervision et pilotage auto-hébergés pour une chaudière à granulés Okofen 
 
 Réécriture complète de l'application PHP originale [stawen/okovision](https://github.com/stawen/okovision). Voir `CHANGELOG.md` pour l'historique des versions.
 
-Statut : stable, première version taguée (`v1.0.0`).
+Statut : stable, version taguée (`v2.0.0`).
 
 ## Déploiement
 
