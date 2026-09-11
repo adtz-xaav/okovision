@@ -35,20 +35,26 @@
 ehthumbs.db
 Thumbs.db
 
-# Custom Project file #
-#######################
-*.csv
-config.php
-config.json
-*@eaDir
-@eaDir/
-Thumbs.db
-import.csv
-matrice.csv
-test*
-_tmp/*.sql
-_tmp/*.txt
-php.ini
-.c9/
+# Node/TS tooling (Okovision 2.0 rewrite)
+node_modules/
+dist/
+build/
+.env
+.env.*
+!.env.example
+coverage/
 
+# Claude Code local-only files
+.claude/settings.local.json
+.claude/*.local.json
+.claude/scheduled_tasks.lock
+
+# Claude Code project docs/config kept locally for development, not distributed publicly
+# (agent definitions reference real operational details — NAS hostname, network layout, etc.)
+CLAUDE.md
+.claude/agents/
+
+# Original PHP app, kept locally for reference during the rewrite — unlicensed upstream
+# code (https://github.com/stawen/okovision), not redistributed. See issue #11.
+legacy/
 

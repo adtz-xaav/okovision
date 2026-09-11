@@ -1,0 +1,215 @@
+// Prisma schema for Okovision — see docs/architecture (CLAUDE.md) for the data model rationale.
+// The legacy app pivoted sensors into columns (one col_N per sensor); SensorReading below is
+// deliberately narrow (sensorId, timestamp, value) so adding a sensor is a data change, not a
+// schema migration.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole {
+  ADMIN
+  VIEWER
+}
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String
+  role         UserRole @default(VIEWER)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Sensor {
+  id         String          @id @default(uuid())
+  key        String          @unique // stable admin-chosen slug, e.g. "outdoor_temp" — independent of wire format
+  label      String
+  unit       String?
+  correction Float           @default(0)
+  csvColumn  Int?            @unique // 0-based column index in the boiler's daily CSV, after the jour/heure columns
+  createdAt  DateTime        @default(now())
+  updatedAt  DateTime        @updatedAt
+  readings   SensorReading[]
+  graphLinks GraphSensor[]
+
+  // Optional roles a sensor can play in the daily synthesis calculation (see
+  // SynthesisConfig) — a sensor plays at most one such role at a time.
+  synthesisAsOutdoorTemp  SynthesisConfig? @relation("SynthesisOutdoorTemp")
+  synthesisAsAugerRun     SynthesisConfig? @relation("SynthesisAugerRun")
+  synthesisAsAugerPause   SynthesisConfig? @relation("SynthesisAugerPause")
+  synthesisAsBurnerCycle  SynthesisConfig? @relation("SynthesisBurnerCycle")
+}
+
+// Singleton row (id is always "singleton") holding how to reach the boiler on the LAN.
+// Historical CSV pull needs only the host. The live channel additionally needs the
+// boiler's own web UI login — a separate credential set from Okovision's own users —
+// so username/password are optional and only required once live control is configured.
+// The password is encrypted at rest (reversible — see lib/crypto.ts), never hashed,
+// because the connector genuinely needs the plaintext to log in to the boiler.
+model BoilerConnection {
+  id                String   @id @default("singleton")
+  host              String
+  username          String?
+  encryptedPassword String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+// Admin-configured mapping from a friendly name to a real tag path on the boiler's live
+// protocol (e.g. "CAPPL:LOCAL.anlage_betriebsart"), discovered by reading the boiler's own
+// config.min.js rather than guessed — see PellematicTouchClient. Values on the wire are
+// raw scaled integers; divisor converts to/from the human-readable value shown in the UI.
+model LiveTag {
+  id        String   @id @default(uuid())
+  key       String   @unique
+  label     String
+  tag       String   @unique
+  writable  Boolean  @default(false)
+  divisor   Float    @default(1)
+  unit      String?
+  minValue  Float? // real-value (post-divisor) lower bound enforced on writes; null = unbounded
+  maxValue  Float? // real-value (post-divisor) upper bound enforced on writes; null = unbounded
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model SensorReading {
+  id        BigInt   @id @default(autoincrement())
+  sensorId  String
+  sensor    Sensor   @relation(fields: [sensorId], references: [id], onDelete: Cascade)
+  timestamp DateTime
+  value     Float
+
+  @@unique([sensorId, timestamp])
+  @@index([sensorId, timestamp])
+}
+
+// One row per boiler log day, holding the exact CSV text as served by the boiler. The
+// Pellematic Touch only retains a rolling few days of logs on its own storage, so this is
+// the only durable copy once that window rolls past a given day — and it also means a
+// future change to parsing/column-mapping logic can be replayed against real history
+// instead of being stuck with whatever SensorReading rows already exist.
+model RawCsvArchive {
+  date      String   @id // YYYY-MM-DD, matches the boiler's own touch_YYYYMMDD.csv naming
+  content   String
+  fetchedAt DateTime @default(now())
+}
+
+model Graph {
+  id        String        @id @default(uuid())
+  name      String
+  position  Int           @default(0)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+  sensors   GraphSensor[]
+}
+
+model GraphSensor {
+  id         String @id @default(uuid())
+  graphId    String
+  graph      Graph  @relation(fields: [graphId], references: [id], onDelete: Cascade)
+  sensorId   String
+  sensor     Sensor @relation(fields: [sensorId], references: [id], onDelete: Cascade)
+  coefficient Float @default(1)
+  position   Int    @default(0)
+
+  @@unique([graphId, sensorId])
+}
+
+model Season {
+  id        String   @id @default(uuid())
+  label     String
+  startDate DateTime
+  endDate   DateTime
+  createdAt DateTime @default(now())
+}
+
+model SiloEvent {
+  id         String   @id @default(uuid())
+  occurredAt DateTime
+  quantityKg Float
+  note       String?
+  createdAt  DateTime @default(now())
+}
+
+// Singleton row (id is always "singleton") designating which sensors feed the daily
+// synthesis calculation — the boiler exposes auger run/pause time and a burner-cycle
+// counter as ordinary sensors, so rather than hardcoding sensor keys (fragile — an admin
+// could rename or remap them), the admin explicitly picks the sensor playing each role,
+// mirroring how the legacy app looked sensors up by a fixed "type" instead of a display
+// name. Left unconfigured, the daily synthesis job simply skips whichever metrics need a
+// role that isn't set yet, rather than failing outright.
+model SynthesisConfig {
+  id String @id @default("singleton")
+
+  outdoorTempSensorId String? @unique
+  outdoorTempSensor   Sensor? @relation("SynthesisOutdoorTemp", fields: [outdoorTempSensorId], references: [id])
+
+  // Pellet consumption is derived from the auger's duty cycle each logging interval:
+  // runSeconds / (runSeconds + pauseSeconds), summed across the day and scaled by
+  // pelletWeightPerMinuteGrams — same formula the legacy app used, since it's the only
+  // consumption signal the boiler actually exposes (there's no pellet flow sensor).
+  augerRunSensorId   String? @unique
+  augerRunSensor     Sensor? @relation("SynthesisAugerRun", fields: [augerRunSensorId], references: [id])
+  augerPauseSensorId String? @unique
+  augerPauseSensor   Sensor? @relation("SynthesisAugerPause", fields: [augerPauseSensorId], references: [id])
+
+  burnerCycleSensorId String? @unique
+  burnerCycleSensor   Sensor? @relation("SynthesisBurnerCycle", fields: [burnerCycleSensorId], references: [id])
+
+  pelletWeightPerMinuteGrams Float @default(0)
+  // Reference temperature for heating degree-days (DJU): dju = max(0, referenceTempC - avg(dayMax, dayMin)).
+  referenceTempC             Float @default(18)
+  // Heated floor area, for the g-of-pellet-per-degree-day-per-m² efficiency metric on season reports.
+  houseSurfaceM2             Float @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// One row per calendar day (id is "YYYY-MM-DD", matching the boiler's own daily CSV
+// grouping) — the rewrite's equivalent of the legacy app's oko_resume_day rollup table.
+// Fields are nullable individually because a day can have some metrics without others
+// (e.g. DJU configured but consumption sensors not yet mapped).
+model DailySynthesis {
+  day       String   @id
+  tcExtMax  Float?
+  tcExtMin  Float?
+  consoKg   Float?
+  dju       Float?
+  nbCycle   Int?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model BoilerConfigSnapshot {
+  id        String   @id @default(uuid())
+  label     String?
+  payload   Json
+  createdAt DateTime @default(now())
+}
+
+enum SchedulerRunStatus {
+  PENDING
+  RUNNING
+  SUCCESS
+  FAILED
+}
+
+model SchedulerRun {
+  id          String             @id @default(uuid())
+  job         String // e.g. "boiler-ingest", "daily-synthesis"
+  status      SchedulerRunStatus @default(PENDING)
+  startedAt   DateTime           @default(now())
+  finishedAt  DateTime?
+  error       String?
+  triggeredBy String? // job name of the upstream run that triggered this one, for DAG triggers
+
+  @@index([job, startedAt])
+}
